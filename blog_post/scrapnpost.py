@@ -233,27 +233,27 @@ class ScrapAndPost:
         return content
 
     def realestate_news(self, bp):
-        result = ''
+        result = '<h3>뉴스 언론사 목록</h3><br><strong> 노컷뉴스, Naver, Nate, Daum, 동아일보, 매일경제, 한겨례, 한국경제</strong><br><br>'
 
-        content = self.realestate_daum(bp)
+        content = self.realestate_nocut(bp)  # 노컷뉴스
         result = '%s<br><br><br>%s' % (result, content)
-        content = self.realestate_mbn(bp)
+        content = self.realestate_naver(bp)  # Naver
         result = '%s<br><br><br>%s' % (result, content)
-        content = self.realestate_hankyung(bp)
+        content = self.realestate_nate(bp)  # Nate
         result = '%s<br><br><br>%s' % (result, content)
-
-        content = self.realestate_naver(bp)
-        result = '%s<br><br><br>%s' % (result, content)
-        content = self.realestate_hani(bp)
-        result = '%s<br><br><br>%s' % (result, content)
-        content = self.realestate_donga(bp)
+        content = self.realestate_daum(bp)  # Daum
         result = '%s<br><br><br>%s' % (result, content)
 
-        content = self.realestate_nocut(bp)
-        result = '%s<br><br><br>%s' % (result, content)
-        content = self.realestate_nate(bp)
-        result = '%s<br><br><br>%s' % (result, content)
+        result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
 
+        content = self.realestate_donga(bp)  # 동아일보
+        result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_mbn(bp)  # 매일경제
+        result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_hani(bp)  # 한겨례
+        result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_hankyung(bp)  # 한국경제
+        result = '%s<br><br><br>%s' % (result, content)
         return result
 
     def financial_news(self, bp):
@@ -703,40 +703,27 @@ class ScrapAndPost:
 
         content = self.opinion_gyunghyang(bp)  # 경향신문
         result = '%s<br><br><br>%s' % (result, content)
-
         content = self.opinion_kookmin(bp)  # 국민일보
         result = '%s<br><br><br>%s' % (result, content)
-
         content = self.opinion_donga(bp)  # 동아일보
         result = '%s<br><br><br>%s' % (result, content)
-
         content = self.opinion_mbn(bp)  # 매일경제
         result = '%s<br><br><br>%s' % (result, content)
-
-        # add advertise
-        # result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)
-
         content = self.opinion_moonhwa(bp)  # 문화일보
         result = '%s<br><br><br>%s' % (result, content)
-
         content = self.opinion_segye(bp)  # 세계신문
         result = '%s<br><br><br>%s' % (result, content)
 
+        result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
+
         content = self.opinion_joins(bp)  # 중앙일보
         result = '%s<br><br><br>%s' % (result, content)
-
         content = self.opinion_chosun(bp)  # 조선일보
         result = '%s<br><br><br>%s' % (result, content)
-
-        # add advertise
-        # result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)
-
         content = self.opinion_hani(bp)  # 한겨례
         result = '%s<br><br><br>%s' % (result, content)
-
         content = self.opinion_hankyung(bp)  # 한국경제
         result = '%s<br><br><br>%s' % (result, content)
-
         content = self.opinion_hankook(bp)  # 한국일보
         result = '%s<br><br><br>%s' % (result, content)
 
