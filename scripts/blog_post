@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+"""test posting"""
+
+from blog_post.main import main
+
+main()
