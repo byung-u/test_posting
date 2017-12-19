@@ -253,35 +253,6 @@ class NaverPost:
                              result, href, title, author, date, price)
         return result
 
-    def vic_market(self, bp):
-        result = '<br>'
-        base_url = 'http://company.lottemart.com'
-        r = bp.request_and_get('http://company.lottemart.com/vc/info/branch.do?SITELOC=DK013', '빅마켓')
-        if r is None:
-            return
-        soup = BeautifulSoup(r.text, 'html.parser')
-        for i1, vic in enumerate(soup.find_all(bp.match_soup_class(['vicmarket_normal_box']))):
-            if i1 != 1:
-                continue
-            for i2, li in enumerate(vic.find_all('li')):
-                if i2 % 5 != 0:
-                    continue
-                for img in li.find_all('img'):
-                    thumbnail = '%s%s' % (base_url, img['src'])
-                    break
-                button = str(li.button).split("'")
-                href = '%s%s' % (base_url, button[1])
-                result = '%s<strong><a href="%s" target="_blank">%s<font color="red"></font></a></strong><br>' % (
-                         result, href, li.h3.text)
-                for ul in li.find_all('ul'):
-                    for li2 in ul.find_all('li'):
-                        temp = li2.text.strip().replace('\t', '').replace('\r', '')
-                        temp_info = temp.split('\n')
-                        infos = [t for t in temp_info if len(t) != 0]
-                        result = '%s<br>%s: %s' % (result, infos[0], ' '.join(infos[1:]))
-                result = '%s<br><center><a href="%s" target="_blank"> <img border="0" src="%s" width="150" height="150"></a></center><br><br>' % (result, href, thumbnail)
-        return result
-
     def naver_posting(self, bp):
         if bp.naver_token is None:
             bp.logger.error('get_naver_token failed')
@@ -295,19 +266,32 @@ class NaverPost:
         content = self.car_news(bp)
         bp.naver_post(title, content)
 
-        # title = '[%s] 국내 축제, 행사 일정 (대한민국 구석구석 행복여행)' % bp.today
-        # content = self.sap.get_visit_korea(bp)  # 대한민국 구석구석 행복여행
-        # bp.naver_post(title, content)
+        if bp.week_num == 0:  # monday
+            title = '[%s] 국내 축제, 행사 일정 (대한민국 구석구석 행복여행)' % bp.today
+            content = self.sap.get_visit_korea(bp)  # 대한민국 구석구석 행복여행
+            bp.naver_post(title, content, '8')
 
-        # title = '[%s] 롯데백화점 각 지점별 문화센터 일정' % bp.today
-        # content = self.dap.lotte_curture_center(bp)
-        # bp.naver_post(title, content)
+        elif bp.week_num == 1:
+            title = '[%s] 롯데백화점 각 지점별 문화센터 일정' % bp.today
+            content = self.dap.lotte_curture_center(bp)
+            bp.naver_post(title, content, '8')
 
-        # title = '[%s] 현대백화점 각 지점별 문화센터 추천강좌 일정' % bp.today
-        # content = hyundai_curture_center()
-        # naver_post(token, title, content)
+            title = '[%s] 현대백화점 각 지점별 문화센터 추천강좌 일정' % bp.today
+            content = self.dap.hyundai_curture_center(bp)
+            bp.naver_post(title, content, '8')
 
-        # title = '[%s] 빅마켓 지점별 휴관일, 영업시간, 주소, 연락처 정보' % bp.today
-        # content = vic_market()
-        # naver_post(token, title, content)
+        elif bp.week_num == 2:
+            title = '[%s] 국내 주요언론사 사설, 칼럼 (ㄱ,ㄴ순)' % bp.today
+            content = self.sap.opinion_news(bp)
+            bp.naver_post(title, content)
+
+        elif bp.week_num == 3:
+            title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
+            content = self.sap.get_reddit(bp, 'korea')
+            bp.naver_post(title, content)
+
+        elif bp.week_num == 4:
+            content = self.sap.oversea_exhibition(bp)
+            title = '[%s] 해외 전시 정보' % bp.today
+            bp.naver_post(title, content, '8')
         return
