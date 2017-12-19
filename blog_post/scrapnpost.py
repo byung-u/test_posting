@@ -272,7 +272,7 @@ class ScrapAndPost:
     def get_exhibit_image(self, href):
         try:
             page = urllib.request.urlopen(href)
-        except:
+        except UnicodeEncodeError:
             return None
         base_url = href.split('/')
         base_url = '%s//%s' % (base_url[0], base_url[2])
@@ -370,7 +370,7 @@ class ScrapAndPost:
 
                     temp = '<font color="red">%s</font><br>%s %s<br><br><center><a href="%s" target="_blank"> <img border="0" src="%s" width="150" height="150"></a></center>' % (title, category, price, link, thumbnail)
                     result = '%s<br>%s' % (result, temp)
-                except:
+                except TypeError:
                     continue
         driver.quit()
         return result
