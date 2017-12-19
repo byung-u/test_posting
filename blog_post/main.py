@@ -170,12 +170,12 @@ class BlogPost:
         print(token)
         return token
 
-    def naver_post(self, title, content):
+    def naver_post(self, title, content, category='1'):
         header = "Bearer " + self.naver_token  # Bearer 다음에 공백 추가
         url = "https://openapi.naver.com/blog/writePost.json"
         title = urllib.parse.quote(title)
         contents = urllib.parse.quote(content)
-        data = "title=" + title + "&contents=" + contents
+        data = "title=" + title + "&contents=" + contents + '&categoryNo=' + category
         request = urllib.request.Request(url, data=data.encode("utf-8"))
         request.add_header("Authorization", header)
         response = urllib.request.urlopen(request)
