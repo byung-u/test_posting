@@ -116,7 +116,7 @@ def _get_rfc_info(soup, rfc_num):
 
 def tistory_post(token, title, content, category):
     webdriver = Chrome()
-    response = webdriver.request('POST', 'https://www.tistory.com/apis/post/write', data={"access_token": token, "blogName": "scrapnpost", 'title': title, 'content': content, 'category': category, 'visibility': '2'})
+    response = webdriver.request('POST', 'https://www.tistory.com/apis/post/write', data={"access_token": token, "blogName": "sfixer", 'title': title, 'content': content, 'category': category, 'visibility': '2'})
     webdriver.quit()
     print(response)
 
@@ -129,7 +129,7 @@ def get_tistory_token():
     driver.get('https://www.tistory.com/auth/login?redirectUrl=http%3A%2F%2Fwww.tistory.com%2F')
     # <input type="email" id="loginId" name="loginId" class="tf_g" value="" placeholder="이메일 아이디" required="">
     tid = os.environ.get('TISTORY_ID')
-    tpw = os.environ.get('TISTORY_PW')
+    tpw = os.environ.get('TISTORY_PAW')
     driver.find_element_by_name('loginId').send_keys(tid)
     # <input type="password" id="loginPw" name="password" class="tf_g" placeholder="비밀번호" required="">
     driver.find_element_by_name('password').send_keys(tpw)
@@ -307,7 +307,23 @@ def main():
     # 765395 ETC
     now = datetime.now()
     cur_time = '%4d%02d%02d' % (now.year, now.month, now.day)
-    # token = get_tistory_token()
+    token = get_tistory_token()
+    content = '''
+<a href="https://tools.ietf.org/html/rfc4740"><strong>Diameter SIP Application Command Codes</strong></a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-22">User-Authorization-Request (UAR)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-23">User-Authorization-Answer (UAA)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-27">Server-Assignment-Request (SAR)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-29">Server-Assignment-Answer (SAA)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-33">Location-Info-Request (LIR)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-33">Location-Info-Answer (LIA)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-35">Multimedia-Auth-Request (MAR)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-36">Multimedia-Auth-Answer (MAA)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-39">Registration-Termination-Request (RTR)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-39">Registration-Termination-Answer (RTA)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-41">Push-Profile-Request (PPR)</a><br>
+<a href="https://tools.ietf.org/html/rfc4740#page-42">Push-Profile-Answer (PPA)</a><br>'''
+    title = 'SIP Application 명령어 코드 (RFC4740)'
+    tistory_post(token, title, content, '614257')  # coding
 
     # ######### ########## ########## ########## ########## ##########
     # title = 'RFC 문서 목록[Total: 8179 (20171201)]'
@@ -327,16 +343,16 @@ def main():
     # title = '[%s] 열린책들 세계문학 모음' % cur_time
     # content = ''
     # for i in range(1, 25):
-        # res = get_world_openbooks(i)
-        # content = '%s<br>%s' % (content, res)
-    title = 'Project Euler 문제 목록'
-    content = get_project_euler_problems()
+    # res = get_world_openbooks(i)
+    # content = '%s<br>%s' % (content, res)
+    # title = 'Project Euler 문제 목록'
+    # content = get_project_euler_problems()
 
-    token = get_naver_token()
-    if token is None:
-        print('get_naver_token failed')
-        return
-    naver_post(token, title, content)
+    # token = get_naver_token()
+    # if token is None:
+    #    print('get_naver_token failed')
+    #    return
+    # naver_post(token, title, content)
     # tistory_post(token, title, content, '765395')  # ETC
     return
     # ######### ########## ########## ########## ########## ##########
