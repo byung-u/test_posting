@@ -253,7 +253,7 @@ class DailyLifeAndPost:
         grp_code = {'020000': '은행',
                     '030300': '저축은행',
                     '050000': '보험', }
-         # 030200(여신전문),  060000(금융투자)
+        # 030200(여신전문),  060000(금융투자)
         for gcode, group in grp_code.items():
 
             title = '[%s] %s 주택담보대출 금리 정보' % (bp.today, group)
@@ -262,14 +262,68 @@ class DailyLifeAndPost:
                 continue
             bp.tistory_post('dexa', title, content, '731649')
 
+    def dividend_income(self, bp, rankTpcd):  # 주식 배당 관련 조회
+        # rankTpcd = '1' # [1]시가배당율, [2]액면가배당율
+        stkTpcd = '1'  # [1]보통주, [2]우선주
+        listTpcd = { '11': '유가증권시장', '12': '코스닥시장',
+                     '13': 'K-OTC',  '14': '코넥스시장', '50': '기타비상장', }
+        result =''
+        for tcode, tname in listTpcd.items():
+            if rankTpcd == '1':
+                result = '%s<br><br><br><h3>%s 보통주 (시가배당율 순위)</h3><br><table border="1" cellspacing="0" cellpadding="3" bordercolor="#999999" style="  border-collapse:collapse">' % (result, tname)
+                result = '''%s<tr>
+                 <th>배당순위</th>
+                 <th>주식코드</th>
+                 <th>주식회사</th>
+                 <th>주당배당금</th>
+                 <th><font color="red">시가배당율</font></th>
+                 <th>액면가배당율</th>
+                 </tr>''' % (result)
+            else:
+                result = '%s<br><br><br><h3>%s 보통주 (액면가배당율 순위)</h3><br><table border="1" cellspacing="0" cellpadding="3" bordercolor="#999999" style="  border-collapse:collapse">' % (result, tname)
+                result = '''%s<tr>
+                 <th>배당순위</th>
+                 <th>주식코드</th>
+                 <th>주식회사</th>
+                 <th>주당배당금</th>
+                 <th>시가배당율</th>
+                 <th><font color="red">액면가배당율</font></th>
+                 </tr>''' % (result)
+            for i in range(1, 3):
+                url = 'http://api.seibro.or.kr/openapi/service/StockSvc/getDividendRankN1?year=2017&rankTpcd=' + rankTpcd + '&stkTpcd=' + stkTpcd + '&listTpcd=' + tcode + '&pageNo=' + str(i) + '&ServiceKey=ICGV9XPmt51%2Fru1JBXayIGqnNbMNFr6I%2B6KggRq9x3rl5b4qB%2F7Rx7LkbpjcuKdzOmB5KdGb5ED7l3HnGenERg%3D%3D'
+                r = bp.request_and_get(url, '배당관려조회')
+                soup = BeautifulSoup(r.text, 'lxml')
+                for item in soup.items.find_all('item'):
+                    result = '%s<tr>' % result
+                    # print(item.caltotmarttpcd.text)
+                    result = '%s<td align="center">%s</td>' % (result, item.num.text)
+                    result = '%s<td align="center">%s</td>' % (result, item.shotnisin.text)
+                    result = '%s<td align="center">%s</td>' % (result, item.korsecnnm.text)
+                    result = '%s<td align="right">%s</td>' % (result, item.divamtperstk.text)
+                    result = '%s<td align="right">%s</td>' % (result, item.divratecpri.text)
+                    result = '%s<td align="right">%s</td>' % (result, item.divratepval.text)
+                    result = '%s</tr>' % result
+            result = '%s</table>' % result
+            result = '%s<br>%s<br>' % (result, ADSENSE_MIDDLE)
+
+        return result
+
     # def rent_subsidy(bp):
     #     return
 
     def dexa(self, bp):
+        title = '[%s] 보통주 액면가배당율 순위' % bp.today
+        content = self.dividend_income(bp, '2')
+        bp.tistory_post('dexa', title, content, '731649')
+        return
+        title = '[%s] 보통주 시가배당율 순위' % bp.today
+        content = self.dividend_income(bp, '1')
+        bp.tistory_post('dexa', title, content, '731649')
+    
+
         title = '[%s] 롯데백화점 각 지점별 문화센터 일정' % bp.today
         content = self.lotte_curture_center(bp)
         bp.tistory_post('dexa', title, content, '730606')
-        return
 
         # self.rent_subsidy(bp)
         # return
