@@ -639,7 +639,7 @@ class ScrapAndPost:
         return result
 
     def opinion_kookmin(self, bp):
-        url = 'http://news.kmib.co.kr/article/list.asp?sid1=opi&sid2=&sdate=%s' % bp.today
+        url = 'http://news.kmib.co.kr/article/list.asp?sid1=opi&sid2=&sdate=%s' % bp.yesterday
         r = bp.request_and_get(url, '국민일보Opinion')
         if r is None:
             return
