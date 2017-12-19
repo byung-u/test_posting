@@ -29,7 +29,6 @@ class NaverPost:
                     summary = temp.text.strip()
                 except AttributeError:
                     pass
-                # print(href, title, summary)
                 for img in home.find_all('img'):
                     thumbnail = img['data-src']
                     break
@@ -59,10 +58,7 @@ class NaverPost:
                 for img in l.find_all('img'):
                     thumbnail = (img['src'])
                     break
-                # print(href)
-                # print(thumbnail)
                 title = l.text.strip().split('\n')
-                # print(title[0], ' '.join(title[1:]))
                 if int(title[0]) > 3:
                     temp = '<a href="%s" target="_blank"><strong>%s. %s</strong></a><br><br>' % (
                            href, title[0], ' '.join(title[1:]))
@@ -88,7 +84,6 @@ class NaverPost:
                 href = mlt.a['href']
                 temp = mlt.text.strip().replace('\t', '')
                 title = temp.split('\n')
-                # print(title, href, thumbnail)
                 temp = '<a href="%s" target="_blank"><strong>%s. %s</strong><br></a><br>%s<br><center><a href="%s" target="_blank"> <img border="0" src="%s" width="50" height="50"></a></center><br>' % (
                        href, cnt, title[0], ' '.join(title[1:]), href, thumbnail)
                 result = '%s<br>%s' % (result, temp)
@@ -117,7 +112,6 @@ class NaverPost:
         for article in soup.find_all(bp.match_soup_class(['article-area'])):
             href = '%s%s' % (base_url, article.a['href'])
             article = article.text.strip().split('\n')
-            # print(href, article[0])
             result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, article[0])
         return result
 
@@ -255,7 +249,6 @@ class NaverPost:
                             date = ' '.join(info)
                         elif i3 == 5:
                             price = ' '.join(info)
-                    # print(href, title, author, date, price)
                     result = '%s<br><strong><a href="%s" target="_blank">%s(%s)</a></strong><br>%s<br>%s<br>' % (
                              result, href, title, author, date, price)
         return result
@@ -280,14 +273,12 @@ class NaverPost:
                 href = '%s%s' % (base_url, button[1])
                 result = '%s<strong><a href="%s" target="_blank">%s<font color="red"></font></a></strong><br>' % (
                          result, href, li.h3.text)
-                # print(li.h3.text, thumbnail, href)
                 for ul in li.find_all('ul'):
                     for li2 in ul.find_all('li'):
                         temp = li2.text.strip().replace('\t', '').replace('\r', '')
                         temp_info = temp.split('\n')
                         infos = [t for t in temp_info if len(t) != 0]
                         result = '%s<br>%s: %s' % (result, infos[0], ' '.join(infos[1:]))
-                        # print(infos)
                 result = '%s<br><center><a href="%s" target="_blank"> <img border="0" src="%s" width="150" height="150"></a></center><br><br>' % (result, href, thumbnail)
         return result
 
