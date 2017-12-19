@@ -6,6 +6,7 @@ import urllib.request
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from blog_post.define import ADSENSE_MIDDLE
 
 
 class ScrapAndPost:
@@ -202,13 +203,13 @@ class ScrapAndPost:
         if category == 'it':
             # for submission in reddit.subreddit('redditdev+learnpython').top('all'):
             for idx, sub in enumerate(reddit.subreddit('python+programming').hot(limit=30)):
-                temp = '<a href="%s" target="_blank">[%d] %s (⬆ %s)</a><br><pre>%s</pre><br>' % (sub.url, idx + 1, sub.title, sub.score, bp.naver_papago_smt(sub.title))
+                temp = '<a href="%s" target="_blank">[%d] %s (⬆ %s)</a><br><pre>%s</pre><br>' % (sub.url, idx + 1, sub.title, sub.score, bp.translate_text(sub.title))
                 result = '%s<br>%s' % (result, temp)
             content = '<font color="red">[레딧(Reddit) Python & Programming]</font>%s<br>' % result
 
         elif category == 'korea':
             for idx, sub in enumerate(reddit.subreddit('korea').hot(limit=60)):
-                temp = '<a href="%s" target="_blank">[%d] %s (⬆ %s)</a><br><pre>%s</pre><br>' % (sub.url, idx + 1, sub.title, sub.score, bp.naver_papago_smt(sub.title))
+                temp = '<a href="%s" target="_blank">[%d] %s (⬆ %s)</a><br><pre>%s</pre><br>' % (sub.url, idx + 1, sub.title, sub.score, bp.translate_text(sub.title))
                 result = '%s<br>%s' % (result, temp)
             content = '<font color="red">[레딧(Reddit) Korea]</font>%s<br>' % result
 
@@ -227,7 +228,7 @@ class ScrapAndPost:
                 title = bp.check_valid_string(f.text)
                 for s in f.find_all(bp.match_soup_class(['storylink'])):
                     href = s['href']
-                    temp = '<a href="%s" target="_blank">%s</a><br><pre>%s</pre><br>' % (href, title, bp.naver_papago_smt(title))
+                    temp = '<a href="%s" target="_blank">%s</a><br><pre>%s</pre><br>' % (href, title, bp.naver_papago_nmt(title))
                     result = '%s<br>%s' % (result, temp)
         content = '<font color="red">[해커뉴스(Hacker News)]</font>%s<br>' % result
         return content
@@ -299,7 +300,7 @@ class ScrapAndPost:
         try:
             res = urllib.request.urlopen(req)
         except UnicodeEncodeError:
-            print('[OpenAPI] UnicodeEncodeError')
+            self.logger.error('[overseasExhibition] UnicodeEncodeError')
             return
 
         result = ''
@@ -326,7 +327,6 @@ class ScrapAndPost:
                    exhibit['email'], exhibit['email'],
                    exhibit['firstOpeningYear'], exhibit['openingCycle'],
                    href, img_link)
-            # print(temp)
             result = '%s<br>%s' % (result, temp)
         return result
 
@@ -345,7 +345,6 @@ class ScrapAndPost:
                     thumbnail = (pa['src'])
             if thumbnail.endswith('no_result.png'):
                 continue
-            # print(thumbnail)
             for content in p.find_all(bp.match_soup_class(['content'])):
                 try:
                     c_info = content.a['onclick'].split("'")
@@ -490,7 +489,6 @@ class ScrapAndPost:
                              result, result_url, desc, span.text)
                     result = '%s<center><a href="%s" target="_blank"> <img border="0" src="%s" width="150" height="150"></a></center>' % (
                              result, result_url, thumbnail)
-                    # print(result_url, desc, span.text)
                     break
         return result
 
@@ -513,7 +511,6 @@ class ScrapAndPost:
         base_url = 'http://www.hani.co.kr'
         soup = BeautifulSoup(r.content.decode('utf-8', 'replace'), 'html.parser')
         for article in soup.find_all(bp.match_soup_class(['article'])):
-            # print(article)
             for li in article.find_all('li'):
                 li_href = '%s%s' % (base_url, li.a['href'])
                 li_text = li.text.strip().split('\n')
@@ -522,7 +519,6 @@ class ScrapAndPost:
             href = '%s%s' % (base_url, article.a['href'])
             article = article.text.strip().split('\n')
             title = bp.check_valid_string(article[0])
-            # print(href, article[0])
             result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
         return result
 
@@ -550,7 +546,6 @@ class ScrapAndPost:
         for f in soup.find_all(bp.match_soup_class(['article_list'])):
             for dt in f.find_all('dt'):
                 href = '%s%s' % (base_url, dt.a['href'])
-                # print(href, dt.text)
                 title = bp.check_valid_string(dt.text)
                 result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
         return result
@@ -603,7 +598,6 @@ class ScrapAndPost:
                 href = '%s%s' % (base_url, li.a['href'])
                 title = bp.check_valid_string(li.a.text)
                 result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
-                # print(li.a['href'], li.a.text)
 
         for today in soup.find_all(bp.match_soup_class(['opinion_home_today'])):
             for li in today.find_all('li'):
@@ -611,7 +605,6 @@ class ScrapAndPost:
                 mg = li.find('strong', attrs={'class': 'mg'})
                 title = bp.check_valid_string(mg.text)
                 result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
-                # print(li.a['href'], title.text)
         return result
 
     def opinion_hankook(self, bp):
@@ -640,11 +633,9 @@ class ScrapAndPost:
                 try:
                     title = bp.check_valid_string(li.a['title'])
                     result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, li.a['href'], title)
-                    # print(li.a['href'], title)
                 except KeyError:
                     title = bp.check_valid_string(li.text.split('\n')[1])
                     result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, li.a['href'], title)
-                    # print(li.a['href'], title[1])
         return result
 
     def opinion_kookmin(self, bp):
@@ -682,7 +673,6 @@ class ScrapAndPost:
         for title_2 in soup.find_all(bp.match_soup_class(['title_2'])):
             href = '%s%s' % (base_url, title_2.a['href'])
             title = bp.check_valid_string(title_2.a.text)
-            # print(href, title_2.a.text)
             result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
         return result
 
