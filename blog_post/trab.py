@@ -113,6 +113,7 @@ class TranslationAndPost:
             content = '%s<br>%s<br>' % (content, result)
 
             if idx == 11 and is_not_done:
+                content = '%s<br><br>%s<br><br>' % (content, ADSENSE_MIDDLE)
                 content = '%s<br><br><a href="%s" target="_blank"><font color="blue">[조간과 석간에서 1~10위]</font></a><br><br>' % (content, url)
                 is_not_done = False
                 idx = 1
@@ -127,6 +128,8 @@ class TranslationAndPost:
         soup = BeautifulSoup(r.text, 'html.parser')
         content = '<a href="%s" target="_blank"><font color="blue">[마이니치신문 조회수 1~20위]</font></a><br><br>' % url
         for i in range(1, 21):  # 1 ~ 20
+            if i == 11:
+                content = '%s<br><br>%s<br><br>' % (content, ADSENSE_MIDDLE)
             class_name = 'rank-%d' % i
             for rank in soup.find_all(bp.match_soup_class([class_name])):
                 ko_title = ''
