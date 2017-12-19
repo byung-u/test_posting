@@ -3,6 +3,7 @@ import praw
 import json
 
 from bs4 import BeautifulSoup
+from blog_post.define import ADSENSE_MIDDLE
 
 
 class TranslationAndPost:
@@ -28,7 +29,6 @@ class TranslationAndPost:
                 href = s.a['href']
             except TypeError:
                 continue
-            # print(href, s.a.text)
             r_article = bp.request_and_get(href, 'LinuxToday')
             if r_article is None:
                 continue
@@ -94,14 +94,11 @@ class TranslationAndPost:
 
         soup = BeautifulSoup(r.text, 'html.parser')
         content = '<a href="%s" target="_blank"><font color="blue">[종합 1~10위]</font></a><br><br>' % url
-        # print('종합')
         for item in soup.find_all(bp.match_soup_class(['m-miM32_item'])):
             href = '%s%s' % (base_url, item.a['href'])
             ko_title = bp.translate_text(item.a.text, src='ja', dest='ko')
-            # print([idx], href, ko_text, item.a.text)
             content = '%s<br><strong><a href="%s" target="_blank">%d. %s(%s)</font></a></strong><br>' % (content, href, idx, ko_title, item.a.text)
             idx += 1
-            # print([idx], href, item.a.text)
             a_r = bp.request_and_get(href, '니케이신문')
             if a_r is None:
                 continue
@@ -146,7 +143,6 @@ class TranslationAndPost:
                         continue
                 published = rank.find('p', attrs={'class': 'date'})
                 href = rank.a['href']
-                # print([i], title) # print(published.text) # print(rank.a['href'], '\n\n')
                 content = '%s<br><strong><a href="%s" target="_blank">%d. %s(%s)</font></a></strong><br>%s<br>' % (content, href, i, ko_title, title, published)
                 a_r = bp.request_and_get(rank.a['href'], '마이니치신문')
                 if a_r is None:
@@ -154,7 +150,6 @@ class TranslationAndPost:
                 a_soup = BeautifulSoup(a_r.text, 'html.parser')
                 article = []
                 for mt in a_soup.find_all(bp.match_soup_class(['main-text'])):
-                    # print(mt)
                     for txt in mt.find_all('p', attrs={'class': 'txt'}):
                         article.append(txt.text.strip())
                 result = bp.translate_text_list(article, 'ja', 'ko')
@@ -181,7 +176,6 @@ class TranslationAndPost:
                 ko_title = bp.translate_text(sub.title)
             except json.decoder.JSONDecodeError:
                 pass
-            # print(sub.url, idx + 1, sub.score, sub.title, ko_title)
             temp = '<a href="%s" target="_blank"><strong>[%d위] %s (score: ⬆ %s)</strong></a><pre>%s</pre><br>' % (
                    sub.url, idx + 1, sub.title, sub.score, ko_title)
             result = '%s<br>%s' % (result, temp)
@@ -199,7 +193,6 @@ class TranslationAndPost:
             post_title = ''
             try:
                 href = '%s%s' % (url, s['href'])
-                # print(href, s.h5.text)
                 ko_title = bp.translate_text(s.h5.text)
                 post_title = '[%s] %s(%s)' % (bp.today, ko_title, s.h5.text.strip())
             except TypeError:
