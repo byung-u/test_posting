@@ -104,7 +104,6 @@ class DailyLifeAndPost:
                             date = ' '.join(info)
                         elif i3 == 5:
                             price = ' '.join(info)
-                    # print(href, title, author, date, price)
                     result = '%s<br><strong><a href="%s" target="_blank">%s(%s)</a></strong><br>%s<br>%s<br>' % (
                              result, href, title, author, date, price)
         return result
@@ -129,14 +128,12 @@ class DailyLifeAndPost:
                 href = '%s%s' % (base_url, button[1])
                 result = '%s<strong><a href="%s" target="_blank">%s<font color="red"></font></a></strong><br>' % (
                          result, href, li.h3.text)
-                # print(li.h3.text, thumbnail, href)
                 for ul in li.find_all('ul'):
                     for li2 in ul.find_all('li'):
                         temp = li2.text.strip().replace('\t', '').replace('\r', '')
                         temp_info = temp.split('\n')
                         infos = [t for t in temp_info if len(t) != 0]
                         result = '%s<br>%s: %s' % (result, infos[0], ' '.join(infos[1:]))
-                        # print(infos)
                 result = '%s<br><center><a href="%s" target="_blank"> <img border="0" src="%s" width="150" height="150"></a></center><br><br>' % (result, href, thumbnail)
         return result
 
@@ -188,7 +185,6 @@ class DailyLifeAndPost:
             <th>최고한도</th>
             </tr>''' % (result)
             for banks in js['result']['baseList']:
-                # print(banks['fin_prdt_nm'])
                 result = '%s<tr>' % result
                 result = '%s<td><font color="red">%s</font><br><br>➡ %s으로 가입<br>➡ %s<br>➡ %s</td>' % (result, banks["fin_prdt_nm"], banks['join_way'], self.join_deny(banks['join_deny']), self.dcls_end_day(banks['dcls_end_day']))
                 # result = '%s<td>%s</td>' % (result, banks["join_way"])
@@ -257,8 +253,7 @@ class DailyLifeAndPost:
         grp_code = {'020000': '은행',
                     '030300': '저축은행',
                     '050000': '보험', }
-         030200(여신전문),  060000(금융투자)
-
+         # 030200(여신전문),  060000(금융투자)
         for gcode, group in grp_code.items():
 
             title = '[%s] %s 주택담보대출 금리 정보' % (bp.today, group)
@@ -267,11 +262,17 @@ class DailyLifeAndPost:
                 continue
             bp.tistory_post('dexa', title, content, '731649')
 
-    def self.rent_subsidy(bp)
-    def dexa(self, bp):
+    # def rent_subsidy(bp):
+    #     return
 
-        self.rent_subsidy(bp)
+    def dexa(self, bp):
+        title = '[%s] 롯데백화점 각 지점별 문화센터 일정' % bp.today
+        content = self.lotte_curture_center(bp)
+        bp.tistory_post('dexa', title, content, '730606')
         return
+
+        # self.rent_subsidy(bp)
+        # return
         self.mortgage_loan(bp)
 
         title = '[%s] 정기예금 금리 정보' % bp.today
@@ -280,10 +281,6 @@ class DailyLifeAndPost:
 
         title = '[%s] 빅마켓 지점별 휴관일, 영업시간, 주소, 연락처 정보' % bp.today
         content = self.vic_market(bp)
-        bp.tistory_post('dexa', title, content, '730606')
-
-        title = '[%s] 롯데백화점 각 지점별 문화센터 일정' % bp.today
-        content = self.lotte_curture_center(bp)
         bp.tistory_post('dexa', title, content, '730606')
 
         title = '[%s] 현대백화점 각 지점별 문화센터 추천강좌 일정' % bp.today
