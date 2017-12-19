@@ -114,7 +114,7 @@ class BlogPost:
         #
         ################################################################################
         redirect_url = driver.current_url
-        # print(redirect_url)
+        print(redirect_url)
         temp = re.split('access_token=', redirect_url)
         token = re.split('&state=', temp[1])[0]
         driver.quit()
@@ -147,7 +147,6 @@ class BlogPost:
         code = re.split('&state=', temp[1])[0]
         driver.quit()
         print(redirect_url)
-        print(code)
 
         url = 'https://nid.naver.com/oauth2.0/token?'
         data = 'grant_type=authorization_code' + '&client_id=' + self.naver_cid + '&client_secret=' + self.naver_csec + '&redirect_uri=' + self.naver_redirect + '&code=' + code + '&state=' + state
@@ -163,7 +162,7 @@ class BlogPost:
             js = json.loads(response_body.decode('utf-8'))
             token = js['access_token']
         else:
-            print("Error Code:" + rescode)
+            self.logger.error("Error Code:" + rescode)
             return None
 
         if len(token) == 0:
@@ -183,9 +182,9 @@ class BlogPost:
         rescode = response.getcode()
         if rescode == 200:
             response_body = response.read()
-            print(response_body.decode('utf-8'))
+            self.logger.info(response_body.decode('utf-8'))
         else:
-            print("Error Code:" + rescode)
+            self.logger.error("Error Code:" + rescode)
 
     def naver_papago_nmt(self, words):
         enc_text = urllib.parse.quote(words)
@@ -285,7 +284,7 @@ def do_run(bp):
 
     np = NaverPost()
     np.naver_posting(bp)
-
+    return
     # makpum(bp)
 
 
