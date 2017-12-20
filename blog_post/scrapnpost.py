@@ -205,12 +205,16 @@ class ScrapAndPost:
             for idx, sub in enumerate(reddit.subreddit('python+programming').hot(limit=30)):
                 temp = '<a href="%s" target="_blank">[%d] %s (⬆ %s)</a><br><pre>%s</pre><br>' % (sub.url, idx + 1, sub.title, sub.score, bp.translate_text(sub.title))
                 result = '%s<br>%s' % (result, temp)
+                if idx % 20 == 0:
+                    result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
             content = '<font color="red">[레딧(Reddit) Python & Programming]</font>%s<br>' % result
 
         elif category == 'korea':
             for idx, sub in enumerate(reddit.subreddit('korea').hot(limit=60)):
                 temp = '<a href="%s" target="_blank">[%d] %s (⬆ %s)</a><br><pre>%s</pre><br>' % (sub.url, idx + 1, sub.title, sub.score, bp.translate_text(sub.title))
                 result = '%s<br>%s' % (result, temp)
+                if idx % 20 == 0:
+                    result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
             content = '<font color="red">[레딧(Reddit) Korea]</font>%s<br>' % result
 
         return content
@@ -747,28 +751,28 @@ class ScrapAndPost:
             bp.tistory_post('scrapnpost', title, content, '765395')
 
     def weekday(self, bp):
-        title = '[%s] 부동산 뉴스 헤드라인 모음' % bp.today
+        title = '[%s] 부동산 뉴스 헤드라인 모음(노컷뉴스, Naver, Nate, Daum, 동아일보, 매일경제, 한겨례, 한국경제)' % bp.today
         content = self.realestate_news(bp)
         bp.tistory_post('scrapnpost', title, content, '765348')
 
-        title = '[%s] 경제 금융 뉴스 모음(연합인포맥스, 조선일보, 중앙일보)' % bp.today
+        title = '[%s] 경제 금융 뉴스 헤드라인 모음(연합인포맥스, 조선일보, 중앙일보)' % bp.today
         content = self.financial_news(bp)
         bp.tistory_post('scrapnpost', title, content, '765357')
 
-        content = self.get_reddit(bp, 'korea')
         title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
+        content = self.get_reddit(bp, 'korea')
         bp.tistory_post('scrapnpost', title, content, '765357')
 
-        content = self.get_reddit(bp)
         title = '[%s] Reddit (Programming & Python)' % bp.today
+        content = self.get_reddit(bp)
         bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
 
-        content = self.hacker_news(bp)
         title = '[%s] Hacker News (Ranking 1~30)' % bp.today
+        content = self.hacker_news(bp)
         bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
 
-        content = self.opinion_news(bp)
         title = '[%s] 국내 주요언론사 사설, 칼럼 (ㄱ,ㄴ순)' % bp.today
+        content = self.opinion_news(bp)
         bp.tistory_post('scrapnpost', title, content, '767067')  # 사설, 칼럼
 
     def weekend(self, bp):
