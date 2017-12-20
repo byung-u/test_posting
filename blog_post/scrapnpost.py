@@ -743,11 +743,11 @@ class ScrapAndPost:
             bp.tistory_post('scrapnpost', title, content, '765395')
         else:
             title = '[%s] 국내 축제, 행사 일정 (대한민국 구석구석 행복여행)' % bp.today
-            content = self.get_visit_korea()  # 대한민국 구석구석 행복여행
+            content = self.get_visit_korea(bp)  # 대한민국 구석구석 행복여행
             bp.tistory_post('scrapnpost', title, content, '765395')
 
     def weekday(self, bp):
-        title = '[%s] 부동산 뉴스 모음' % bp.today
+        title = '[%s] 부동산 뉴스 헤드라인 모음' % bp.today
         content = self.realestate_news(bp)
         bp.tistory_post('scrapnpost', title, content, '765348')
 
