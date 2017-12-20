@@ -3,7 +3,6 @@ import praw
 import json
 
 from bs4 import BeautifulSoup
-from blog_post.define import ADSENSE_MIDDLE
 
 
 class TranslationAndPost:
@@ -88,17 +87,13 @@ class TranslationAndPost:
             return
 
         article = []
-        is_not_done = True
-        idx = 1
         base_url = 'https://www.nikkei.com'
-
         soup = BeautifulSoup(r.text, 'html.parser')
-        content = '<a href="%s" target="_blank"><font color="blue">[종합 1~10위]</font></a><br><br>' % url
         for item in soup.find_all(bp.match_soup_class(['m-miM32_item'])):
             href = '%s%s' % (base_url, item.a['href'])
             ko_title = bp.translate_text(item.a.text, src='ja', dest='ko')
-            content = '%s<br><strong><a href="%s" target="_blank">%d. %s(%s)</font></a></strong><br>' % (content, href, idx, ko_title, item.a.text)
-            idx += 1
+            title = '[%s] 니케이신문, %s' % (bp.today, ko_title)
+            content = '<a href="%s" target="_blank"><font color="blue">%s<br>%s</font></a><br><br>' % (href, ko_title, item.a.text)
             a_r = bp.request_and_get(href, '니케이신문')
             if a_r is None:
                 continue
@@ -107,29 +102,21 @@ class TranslationAndPost:
             for article_text in a_soup.find_all(bp.match_soup_class(['cmn-article_text'])):
                 for ps in article_text.find_all('p'):
                     article.append(ps.text)
-
             result = bp.translate_text_list(article, 'ja', 'ko')
             del article[:]
+            if len(result) < 100:  # Too short article
+                continue
             content = '%s<br>%s<br>' % (content, result)
+            bp.tistory_post('trab', title, content, '766335')
+        return
 
-            if idx == 11 and is_not_done:
-                content = '%s<br><br>%s<br><br>' % (content, ADSENSE_MIDDLE)
-                content = '%s<br><br><a href="%s" target="_blank"><font color="blue">[조간과 석간에서 1~10위]</font></a><br><br>' % (content, url)
-                is_not_done = False
-                idx = 1
-
-        return content
-
-    def mainichi_daily_top20(self, bp):
+    def mainichi_daily(self, bp):
         url = 'https://mainichi.jp/ranking/daily/'
         r = bp.request_and_get(url, '마이니치신문')
         if r is None:
             return
         soup = BeautifulSoup(r.text, 'html.parser')
-        content = '<a href="%s" target="_blank"><font color="blue">[마이니치신문 조회수 1~20위]</font></a><br><br>' % url
-        for i in range(1, 21):  # 1 ~ 20
-            if i == 11:
-                content = '%s<br><br>%s<br><br>' % (content, ADSENSE_MIDDLE)
+        for i in range(1, 11):  # 1 ~ 10
             class_name = 'rank-%d' % i
             for rank in soup.find_all(bp.match_soup_class([class_name])):
                 ko_title = ''
@@ -146,7 +133,8 @@ class TranslationAndPost:
                         continue
                 published = rank.find('p', attrs={'class': 'date'})
                 href = rank.a['href']
-                content = '%s<br><strong><a href="%s" target="_blank">%d. %s(%s)</font></a></strong><br>%s<br>' % (content, href, i, ko_title, title, published)
+                content = '<a href="%s" target="_blank"><font color="blue">%s<br>%s</font></a><br><br>%s<br>' % (href, ko_title, midashi.text, published)
+                title = '[%s] 마이니치신문, %s' % (bp.today, ko_title)
                 a_r = bp.request_and_get(rank.a['href'], '마이니치신문')
                 if a_r is None:
                     continue
@@ -157,14 +145,13 @@ class TranslationAndPost:
                         article.append(txt.text.strip())
                 result = bp.translate_text_list(article, 'ja', 'ko')
                 del article[:]
-                # do not add <br> tag
                 if result is None:
-                    content = '%s기사내용 번역불가<br>' % content
-                elif len(result) == 0:
-                    content = '%s기사내용 숨겨짐(번역불가)<br>' % content
-                else:
-                    content = '%s%s<br><br>' % (content, result)
-                break
+                    continue
+                elif len(result) < 100:
+                    continue
+                content = '%s%s<br><br>' % (content, result)
+                bp.tistory_post('trab', title, content, '766335')
+
         return content
 
     def reddit_popular(self, bp):
@@ -218,24 +205,19 @@ class TranslationAndPost:
         return
 
     def trab(self, bp):
+        self.mainichi_daily(bp)
+        return
+        self.nikkei_japan(bp)
+        self.mainichi_daily(bp)
+        self.the_guardian(bp)
 
         title = '[%s] Reddit에서 인기있는 게시글 (1~30위)' % bp.today
         content = self.reddit_popular(bp)
         bp.tistory_post('trab', title, content, '766775')
 
-        title = '[%s] 니케이신문에서 인기있는 간추린 뉴스(1~10위)' % bp.today
-        content = self.nikkei_japan(bp)
-        bp.tistory_post('trab', title, content, '766335')
-
-        title = '[%s] 마이니치신문 하루에 가장 많이 조회된 뉴스(1~20위)' % bp.today
-        content = self.mainichi_daily_top20(bp)
-        bp.tistory_post('trab', title, content, '766335')
-
         title = '[%s] Linux Today 새로운 소식' % bp.today
         content = self.linux_today(bp)
         bp.tistory_post('trab', title, content, '766104')
-
-        self.the_guardian(bp)
 
         if bp.now.day % 7 == 0 or bp.now.day % 7 == 3:
             self.wired_popular(bp)  # twice a week
