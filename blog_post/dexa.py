@@ -188,7 +188,7 @@ class DailyLifeAndPost:
         result = '금융감독원의 금융상품통합 비교공시 정보를 바탕으로 작성된 글입니다.<br><br><br>'
         cnt = 0
         for bank, code in code_info.items():
-            url = 'http://finlife.fss.or.kr/finlifeapi/depositProductsSearch.json?auth=%s&topFinGrpNo=020000&pageNo=1&financeCd=%s' % (bp.finlife_key, gcode, code)
+            url = 'http://finlife.fss.or.kr/finlifeapi/depositProductsSearch.json?auth=%s&topFinGrpNo=%s&pageNo=1&financeCd=%s' % (bp.finlife_key, gcode, code)
             r = bp.request_and_get(url, '금융감독원_예금금리정보')
             if r is None:
                 continue
