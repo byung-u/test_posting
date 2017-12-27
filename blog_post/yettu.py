@@ -266,6 +266,10 @@ class NaverPost:
         content = self.car_news(bp)
         bp.naver_post(title, content)
 
+        title = '[%s] 국내 주요언론사 사설, 칼럼 (ㄱ,ㄴ순)' % bp.today
+        content = self.sap.opinion_news(bp)
+        bp.naver_post(title, content)
+
         if bp.week_num == 0:  # monday
             title = '[%s] 국내 축제, 행사 일정 (대한민국 구석구석 행복여행)' % bp.today
             content = self.sap.get_visit_korea(bp)  # 대한민국 구석구석 행복여행
@@ -276,15 +280,10 @@ class NaverPost:
             content = self.dap.lotte_curture_center(bp)
             bp.naver_post(title, content, '8')
 
+        elif bp.week_num == 2:
             title = '[%s] 현대백화점 각 지점별 문화센터 추천강좌 일정' % bp.today
             content = self.dap.hyundai_curture_center(bp)
             bp.naver_post(title, content, '8')
-
-        elif bp.week_num == 2:
-            title = '[%s] 국내 주요언론사 사설, 칼럼 (ㄱ,ㄴ순)' % bp.today
-            content = self.sap.opinion_news(bp)
-            bp.naver_post(title, content)
-
         elif bp.week_num == 3:
             title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
             content = self.sap.get_reddit(bp, 'korea')
