@@ -266,8 +266,8 @@ def do_run(bp):
     sap.scrapnpost(bp)
     sleep(5)  # 5 sec
 
-    # np = NaverPost()
-    # np.naver_posting(bp)
+    np = NaverPost()
+    np.naver_posting(bp)
     # sleep(5)  # Naver no sleep
 
     dap = DailyLifeAndPost()
@@ -277,7 +277,6 @@ def do_run(bp):
     tap = TranslationAndPost()
     tap.trab(bp)
     return
-    # makpum(bp)
 
 
 def main():
