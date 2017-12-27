@@ -9,10 +9,12 @@ import urllib.request
 
 from datetime import datetime, timedelta
 from googletrans import Translator
+from goose3 import Goose
 from random import choice
 from requests import get, codes
 from selenium import webdriver
 from seleniumrequests import Chrome
+from time import sleep
 
 from blog_post.scrapnpost import ScrapAndPost
 from blog_post.trab import TranslationAndPost
@@ -25,6 +27,7 @@ cgitb.enable(format='text')
 
 class BlogPost:
     def __init__(self):
+        self.g = Goose()
         self.t = Translator()
 
         self.now = datetime.now()
@@ -33,7 +36,6 @@ class BlogPost:
         self.yesterday = '%4d%02d%02d' % (self.now_m1.year, self.now_m1.month, self.now_m1.day)
         self.str_yesterday = '%4d/%s/%02d' % (self.now_m1.year, self.now_m1.strftime("%b").lower(), self.now_m1.day)
         self.yesterday_only_day = '%02d' % (self.now_m1.day)
-
         self.week_num = datetime.today().weekday()
 
         self.chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
@@ -233,36 +235,23 @@ class BlogPost:
         return ko_text
 
     def translate_text_list(self, article, src='en', dest='ko'):
-        result, text = [], []
-        total_len = 0
-        request_txt = ''
+        result = []
         for line in article:
-            total_len += len(line)
-            text.append(line)
-            if total_len > 4000:
-                request_txt = '<br>'.join(text)
-                try:
-                    if src is not 'ja':
-                        ja_text = self.t.translate(request_txt, src=src, dest='ja').text
-                        ko_text = self.t.translate(ja_text, src='ja', dest=dest).text
-                    else:
-                        ko_text = self.t.translate(request_txt, src=src, dest=dest).text
-                except:
-                    return None
-                result.append(ko_text)
-                del text[:]
-                total_len = 0
+            if len(line) == 0:
+                result.append('<br>')
+                continue
+            sleep(0.5)  # 500 msec
+            try:
+                if src is not 'ja':
+                    ja_text = self.t.translate(line, src=src, dest='ja').text
+                    ko_text = self.t.translate(ja_text, src='ja', dest=dest).text
+                else:
+                    ko_text = self.t.translate(line, src=src, dest=dest).text
+            except:
+                print('[Translate Error]', line)
+                return None
+            result.append(ko_text)
 
-        request_txt = '<br>'.join(text)
-        try:
-            if src is not 'ja':
-                ja_text = self.t.translate(request_txt, src=src, dest='ja').text
-                ko_text = self.t.translate(ja_text, src='ja', dest=dest).text
-            else:
-                ko_text = self.t.translate(request_txt, src=src, dest=dest).text
-        except:
-            return None
-        result.append(ko_text)
         return '<br>'.join(result)
 
     def match_soup_class(self, target, mode='class'):
@@ -275,15 +264,18 @@ class BlogPost:
 def do_run(bp):
     sap = ScrapAndPost()
     sap.scrapnpost(bp)
+    sleep(5)  # 5 sec
 
-    tap = TranslationAndPost()
-    tap.trab(bp)
+    # np = NaverPost()
+    # np.naver_posting(bp)
+    # sleep(5)  # Naver no sleep
 
     dap = DailyLifeAndPost()
     dap.dexa(bp)
+    sleep(5)  # 5 sec
 
-    np = NaverPost()
-    np.naver_posting(bp)
+    tap = TranslationAndPost()
+    tap.trab(bp)
     return
     # makpum(bp)
 
