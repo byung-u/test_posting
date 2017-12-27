@@ -723,34 +723,11 @@ class ScrapAndPost:
 
         return result
 
-    def once_a_4days(self, bp):
-        # every 4 days
-        if bp.now.day % 4 == 1:
-            title = '[%s] 전체 신간 리스트 - 국내도서 30권(알라딘)' % bp.today
-            content = self.aladin_book(bp)
-            bp.tistory_post('scrapnpost', title, content, '765395')
-
-            title = '[%s] 주목할 만한 신간 리스트 - 국내도서 20권(알라딘)' % bp.today
-            content = self.aladin_book(bp, 'ItemNewSpecial', 20)
-            bp.tistory_post('scrapnpost', title, content, '765395')
-
-            title = '[%s] 베스트셀러 - 30권(알라딘)' % bp.today
-            content = self.aladin_book(bp, 'Bestseller', 30)
-            bp.tistory_post('scrapnpost', title, content, '765395')
-        elif bp.now.day % 4 == 2:
-            content = self.oversea_exhibition(bp)
-            title = '[%s] 해외 전시 정보' % bp.today
-            bp.tistory_post('scrapnpost', title, content, '765395')
-        elif bp.now.day % 4 == 3:
-            title = '[%s] 코엑스, 예술의 전당(공연, 전시)' % bp.today
-            content = self.domestic_exhibition(bp)
-            bp.tistory_post('scrapnpost', title, content, '765395')
-        else:
-            title = '[%s] 국내 축제, 행사 일정 (대한민국 구석구석 행복여행)' % bp.today
-            content = self.get_visit_korea(bp)  # 대한민국 구석구석 행복여행
-            bp.tistory_post('scrapnpost', title, content, '765395')
-
     def weekday(self, bp):
+        title = '[%s] 국내 주요언론사 사설, 칼럼 (ㄱ,ㄴ순)' % bp.today
+        content = self.opinion_news(bp)
+        bp.tistory_post('scrapnpost', title, content, '767067')  # 사설, 칼럼
+
         title = '[%s] 부동산 뉴스 헤드라인 모음(노컷뉴스, Naver, Nate, Daum, 동아일보, 매일경제, 한겨례, 한국경제)' % bp.today
         content = self.realestate_news(bp)
         bp.tistory_post('scrapnpost', title, content, '765348')
@@ -758,22 +735,6 @@ class ScrapAndPost:
         title = '[%s] 경제 금융 뉴스 헤드라인 모음(연합인포맥스, 조선일보, 중앙일보)' % bp.today
         content = self.financial_news(bp)
         bp.tistory_post('scrapnpost', title, content, '765357')
-
-        title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
-        content = self.get_reddit(bp, 'korea')
-        bp.tistory_post('scrapnpost', title, content, '765357')
-
-        title = '[%s] Reddit (Programming & Python)' % bp.today
-        content = self.get_reddit(bp)
-        bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
-
-        title = '[%s] Hacker News (Ranking 1~30)' % bp.today
-        content = self.hacker_news(bp)
-        bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
-
-        title = '[%s] 국내 주요언론사 사설, 칼럼 (ㄱ,ㄴ순)' % bp.today
-        content = self.opinion_news(bp)
-        bp.tistory_post('scrapnpost', title, content, '767067')  # 사설, 칼럼
 
     def weekend(self, bp):
         title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
@@ -789,11 +750,38 @@ class ScrapAndPost:
         bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
 
     def scrapnpost(self, bp):
-        self.once_a_4days(bp)
         if bp.week_num < 5:
             self.weekday(bp)
-        else:
-            self.weekend(bp)
+
+        if bp.week_num == 0:
+            title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
+            content = self.get_reddit(bp, 'korea')
+            bp.tistory_post('scrapnpost', title, content, '765357')
+            content = self.oversea_exhibition(bp)
+            title = '[%s] 해외 전시 정보' % bp.today
+            bp.tistory_post('scrapnpost', title, content, '765395')
+        elif bp.week_num == 1:
+            title = '[%s] Reddit (Programming & Python)' % bp.today
+            content = self.get_reddit(bp)
+            bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
+        elif bp.week_num == 2:
+            title = '[%s] Hacker News (Ranking 1~30)' % bp.today
+            content = self.hacker_news(bp)
+            bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
+        elif bp.week_num == 3:
+            title = '[%s] 주목할 만한 신간 리스트 - 국내도서 20권(알라딘)' % bp.today
+            content = self.aladin_book(bp, 'ItemNewSpecial', 20)
+            bp.tistory_post('scrapnpost', title, content, '765395')
+            title = '[%s] 베스트셀러 - 30권(알라딘)' % bp.today
+            content = self.aladin_book(bp, 'Bestseller', 30)
+            bp.tistory_post('scrapnpost', title, content, '765395')
+        elif bp.week_num == 4:
+            title = '[%s] 코엑스, 예술의 전당(공연, 전시)' % bp.today
+            content = self.domestic_exhibition(bp)
+            bp.tistory_post('scrapnpost', title, content, '765395')
+            title = '[%s] 국내 축제, 행사 일정 (대한민국 구석구석 행복여행)' % bp.today
+            content = self.get_visit_korea(bp)  # 대한민국 구석구석 행복여행
+            bp.tistory_post('scrapnpost', title, content, '765395')
 
         # content = self.kdi_research(bp)
         # title = '[%s] KDI 한국개발연구원 연구주제별 보고서' % today
