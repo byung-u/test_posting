@@ -79,6 +79,7 @@ class TranslationAndPost:
 
             post_title = '[%s] %s(%s)' % (bp.today, ko_title, title)
             bp.tistory_post('trab', post_title, content, '766230')
+            return  # XXX: only 1 article posting
 
     def nikkei_japan(self, bp):
         url = 'https://www.nikkei.com/access/'
@@ -89,7 +90,9 @@ class TranslationAndPost:
         article = []
         base_url = 'https://www.nikkei.com'
         soup = BeautifulSoup(r.text, 'html.parser')
-        for item in soup.find_all(bp.match_soup_class(['m-miM32_item'])):
+        for idx, item in enumerate(soup.find_all(bp.match_soup_class(['m-miM32_item']))):
+            if idx == 4:
+                return  # XXX: 3 articles posting
             href = '%s%s' % (base_url, item.a['href'])
             ko_title = bp.translate_text(item.a.text, src='ja', dest='ko')
             title = '[%s] 니케이신문, %s' % (bp.today, ko_title)
@@ -116,7 +119,7 @@ class TranslationAndPost:
         if r is None:
             return
         soup = BeautifulSoup(r.text, 'html.parser')
-        for i in range(1, 11):  # 1 ~ 10
+        for i in range(1, 4):  # 1 ~ 3
             class_name = 'rank-%d' % i
             for rank in soup.find_all(bp.match_soup_class([class_name])):
                 ko_title = ''
@@ -160,7 +163,7 @@ class TranslationAndPost:
                              user_agent='USERAGENT', username=bp.reddit_id)
 
         result = ''
-        for idx, sub in enumerate(reddit.subreddit('popular').hot(limit=30)):
+        for idx, sub in enumerate(reddit.subreddit('popular').hot(limit=20)):
             ko_title = ''
             try:
                 ko_title = bp.translate_text(sub.title)
@@ -183,41 +186,41 @@ class TranslationAndPost:
             post_title = ''
             try:
                 href = '%s%s' % (url, s['href'])
-                ko_title = bp.translate_text(s.h5.text)
-                post_title = '[%s] %s(%s)' % (bp.today, ko_title, s.h5.text.strip())
             except TypeError:
                 continue
-            a_r = bp.request_and_get(href, 'Wired인기뉴스')
-            if a_r is None:
-                continue
-            a_soup = BeautifulSoup(a_r.text, 'html.parser')
-            for body in a_soup.find_all(bp.match_soup_class(['article-body-component'])):
-                for body_p in body.find_all('p'):
-                    if str(body_p).find('p class=') != -1:
-                        continue
-                    article.append(body_p.text)
+
+            extract = bp.g.extract(href)
+            ko_title = bp.translate_text(extract.title)
+            post_title = '[%s] %s(%s)' % (bp.today, ko_title, extract.title)
+
+            article = extract.cleaned_text.split('\n')
             if len(article) == 0:
                 continue
             result = '<a href="%s" target="_blank"><font color="red">🔗  원문: %s</font></a><br>' % (href, href)
+            result = '%s<br><br><center><a href="%s" target="_blank"> <img border="0" src="%s" width=250 height=200></a></center><br>' % (result, href, extract.top_image.src)
             content = bp.translate_text_list(article, 'en', 'ko')
+            if content is None:
+                continue
             result = '%s<br>%s' % (result, content)
             bp.tistory_post('trab', post_title, result, '766972')
+            return  # XXX: only 1 article posting
         return
 
     def trab(self, bp):
-        self.mainichi_daily(bp)
-        return
-        self.nikkei_japan(bp)
-        self.mainichi_daily(bp)
-        self.the_guardian(bp)
+        if bp.week_num == 0:
+            self.nikkei_japan(bp)
+        elif bp.week_num == 1:
+            self.mainichi_daily(bp)
+        elif bp.week_num == 2:
+            title = '[%s] Reddit에서 인기있는 게시글 (1~30위)' % bp.today
+            content = self.reddit_popular(bp)
+            bp.tistory_post('trab', title, content, '766775')
 
-        title = '[%s] Reddit에서 인기있는 게시글 (1~30위)' % bp.today
-        content = self.reddit_popular(bp)
-        bp.tistory_post('trab', title, content, '766775')
-
-        title = '[%s] Linux Today 새로운 소식' % bp.today
-        content = self.linux_today(bp)
-        bp.tistory_post('trab', title, content, '766104')
-
-        if bp.now.day % 7 == 0 or bp.now.day % 7 == 3:
+            title = '[%s] Linux Today 새로운 소식' % bp.today
+            content = self.linux_today(bp)
+            bp.tistory_post('trab', title, content, '766104')
+        elif bp.week_num == 3:
             self.wired_popular(bp)  # twice a week
+        elif bp.week_num == 4:
+            self.the_guardian(bp)
+
