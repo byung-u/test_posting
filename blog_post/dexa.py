@@ -265,7 +265,7 @@ class DailyLifeAndPost:
                              js['result']['optionList'][i]['lend_rate_min'],
                              js['result']['optionList'][i]['lend_rate_max'],
                              js['result']['optionList'][i]['lend_rate_avg'])
-                result = '%s<td></tr>' % result
+                result = '%s</td></tr>' % result
             result = '%s</table><br><br><br>' % result
         return result
 
