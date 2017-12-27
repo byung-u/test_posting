@@ -49,7 +49,7 @@ class DailyLifeAndPost:
                     href = '%s%s' % (base_url, li.a['href'])
                     date = li.find('span', attrs={'class': 'date'})
                     fee = li.find('span', attrs={'class': 'fee'})
-                    result = '%s<br><strong><a href="%s" target="_blank">%s</a></strong><br>%s<br>%s<br>' % (
+                    result = '%s<br><strong><a href="%s" target="_blank">%s</a></strong><br>%s<br>[%s]<br>' % (
                              result, href, li.a.text.strip(), date.text, fee.text)
         return result
 
@@ -104,7 +104,7 @@ class DailyLifeAndPost:
                             date = ' '.join(info)
                         elif i3 == 5:
                             price = ' '.join(info)
-                    result = '%s<br><strong><a href="%s" target="_blank">%s(%s)</a></strong><br>%s<br>%s<br>' % (
+                    result = '%s<br><strong><a href="%s" target="_blank">%s(%s)</a></strong><br>%s<br>[%s]<br>' % (
                              result, href, title, author, date, price)
         return result
 
@@ -214,12 +214,8 @@ class DailyLifeAndPost:
                 result = '%s</tr>' % result
             result = '%s</table><br><br><br>' % result
             cnt += 1
-            if group == '은행':
-                if cnt % 3 == 0:
-                    result = '%s<br>%s<br><br><br>' % (result, ADSENSE_MIDDLE)
-            else:
-                if cnt % 5 == 0:
-                    result = '%s<br>%s<br><br><br>' % (result, ADSENSE_MIDDLE)
+            if cnt % 10 == 0:
+                result = '%s<br>%s<br><br><br>' % (result, ADSENSE_MIDDLE)
         return result
 
     def get_specipic_mortgage_loan(self, bp, gcode, group):
@@ -328,7 +324,7 @@ class DailyLifeAndPost:
                 result = '%s</td></tr>' % result
             result = '%s</table><br><br><br>' % result
             cnt += 1
-            if cnt % 5 == 0:
+            if cnt % 10 == 0:
                 result = '%s<br>%s<br><br><br>' % (result, ADSENSE_MIDDLE)
         return result
 
@@ -392,7 +388,7 @@ class DailyLifeAndPost:
                 result = '%s</td></tr>' % result
             result = '%s</table><br><br><br>' % result
             cnt += 1
-            if cnt % 5 == 0:
+            if cnt % 10 == 0:
                 result = '%s<br>%s<br><br><br>' % (result, ADSENSE_MIDDLE)
         return result
 
@@ -496,12 +492,8 @@ class DailyLifeAndPost:
 
             result = '%s</table><br><br><br>' % result
             cnt += 1
-            if group == '은행':
-                if cnt % 3 == 0:
-                    result = '%s<br>%s<br><br><br>' % (result, ADSENSE_MIDDLE)
-            else:
-                if cnt % 5 == 0:
-                    result = '%s<br>%s<br><br><br>' % (result, ADSENSE_MIDDLE)
+            if cnt % 10 == 0:
+                result = '%s<br>%s<br><br><br>' % (result, ADSENSE_MIDDLE)
         return result
 
     def savings(self, bp):
@@ -575,47 +567,44 @@ class DailyLifeAndPost:
     def dexa(self, bp):
         if bp.week_num == 0:  # monday
 
-            self.rent_subsidy(bp)  # 전세자금대출
+            title = '[%s] 롯데백화점 각 지점별 문화센터 일정' % bp.today
+            content = self.lotte_curture_center(bp)
+            bp.tistory_post('dexa', title, content, '730606')
+            # self.rent_subsidy(bp)  # 전세자금대출
 
-            title = '[%s] 보통주 시가배당율 순위' % bp.today
-            content = self.dividend_income(bp, '1')
-            bp.tistory_post('dexa', title, content, '731649')
+            # title = '[%s] 보통주 시가배당율 순위' % bp.today
+            # content = self.dividend_income(bp, '1')
+            # bp.tistory_post('dexa', title, content, '731649')
 
         elif bp.week_num == 1:
 
-            self.private_loan(bp)  # 신용대출
+            title = '[%s] 현대백화점 각 지점별 문화센터 추천강좌 일정' % bp.today
+            content = self.hyundai_curture_center(bp)
+            bp.tistory_post('dexa', title, content, '730606')
+            # self.private_loan(bp)  # 신용대출
 
-            title = '[%s] 보통주 액면가배당율 순위' % bp.today
-            content = self.dividend_income(bp, '2')
-            bp.tistory_post('dexa', title, content, '731649')
+            # title = '[%s] 보통주 액면가배당율 순위' % bp.today
+            # content = self.dividend_income(bp, '2')
+            # bp.tistory_post('dexa', title, content, '731649')
 
         elif bp.week_num == 2:
 
-            self.mortgage_loan(bp)  # 주택담보대출
+            self.fixed_deposit(bp)  # 예금
 
-            title = '[%s] 우선주 시가배당율 순위' % bp.today
-            content = self.dividend_income(bp, '1', '2')
-            bp.tistory_post('dexa', title, content, '731649')
+            # self.mortgage_loan(bp)  # 주택담보대출
+
+            # title = '[%s] 우선주 시가배당율 순위' % bp.today
+            # content = self.dividend_income(bp, '1', '2')
+            # bp.tistory_post('dexa', title, content, '731649')
 
         elif bp.week_num == 3:
 
             self.savings(bp)  # 적금
 
-            title = '[%s] 우선주 액면가배당율 순위' % bp.today
-            content = self.dividend_income(bp, '2', '2')
-            bp.tistory_post('dexa', title, content, '731649')
-
-        elif bp.week_num == 4:
-
-            self.fixed_deposit(bp)  # 예금
-
-            title = '[%s] 롯데백화점 각 지점별 문화센터 일정' % bp.today
-            content = self.lotte_curture_center(bp)
-            bp.tistory_post('dexa', title, content, '730606')
-
-            title = '[%s] 현대백화점 각 지점별 문화센터 추천강좌 일정' % bp.today
-            content = self.hyundai_curture_center(bp)
-            bp.tistory_post('dexa', title, content, '730606')
+            # title = '[%s] 우선주 액면가배당율 순위' % bp.today
+            # content = self.dividend_income(bp, '2', '2')
+            # bp.tistory_post('dexa', title, content, '731649')
+        # elif bp.week_num == 4:
             # title = '[%s] 빅마켓 지점별 휴관일, 영업시간, 주소, 연락처 정보' % bp.today
             # content = self.vic_market(bp)
             # bp.tistory_post('dexa', title, content, '730606')
