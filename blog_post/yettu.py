@@ -258,16 +258,24 @@ class NaverPost:
             bp.logger.error('get_naver_token failed')
             return
 
-        title = '[%s] 많이 클릭된 연예 뉴스 모음(Naver, Daum, Nate)' % bp.today
-        content = self.entertainment(bp)
-        bp.naver_post(title, content)
+        # title = '[%s] 많이 클릭된 연예 뉴스 모음(Naver, Daum, Nate)' % bp.today
+        # content = self.entertainment(bp)
+        # bp.naver_post(title, content)
 
-        title = '[%s] 자동차 뉴스 모음(한겨례, 노컷뉴스, Nate)' % bp.today
-        content = self.car_news(bp)
-        bp.naver_post(title, content)
+        # title = '[%s] 자동차 뉴스 모음(한겨례, 노컷뉴스, Nate)' % bp.today
+        # content = self.car_news(bp)
+        # bp.naver_post(title, content)
 
-        title = '[%s] 국내 주요언론사 사설, 칼럼 (ㄱ,ㄴ순)' % bp.today
+        title = '[%s] 국내 주요언론사 사설, 칼럼 (ㄱ,ㄴ,ㄷ 순)' % bp.today
         content = self.sap.opinion_news(bp)
+        bp.naver_post(title, content)
+
+        title = '[%s] 정책뉴스' % bp.today
+        content = self.sap.koreagov_news(bp)
+        bp.naver_post(title, content)
+
+        title = '[%s] Reddit에 공유된 오늘 내가 배운것(Today I Learned)' % bp.today
+        content = self.sap.get_reddit(bp, 'til')
         bp.naver_post(title, content)
 
         if bp.week_num == 0:  # monday
@@ -275,19 +283,28 @@ class NaverPost:
             content = self.sap.get_visit_korea(bp)  # 대한민국 구석구석 행복여행
             bp.naver_post(title, content, '8')
 
+            self.dap.fixed_deposit(bp, vendor='naver')  # 예금
+
         elif bp.week_num == 1:
             title = '[%s] 롯데백화점 각 지점별 문화센터 일정' % bp.today
             content = self.dap.lotte_curture_center(bp)
             bp.naver_post(title, content, '8')
 
+            self.dap.savings(bp, vendor='naver')  # 예금
+
         elif bp.week_num == 2:
             title = '[%s] 현대백화점 각 지점별 문화센터 추천강좌 일정' % bp.today
             content = self.dap.hyundai_curture_center(bp)
             bp.naver_post(title, content, '8')
+
         elif bp.week_num == 3:
-            title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
-            content = self.sap.get_reddit(bp, 'korea')
+            title = '[%s] Reddit의 세계뉴스' % bp.today
+            content = self.sap.get_reddit(bp, 'worldnews')
             bp.naver_post(title, content)
+
+            title = '[%s] 코엑스, 예술의 전당(공연, 전시)' % bp.today
+            content = self.domestic_exhibition(bp)
+            bp.naver_post(title, content, '8')
 
         elif bp.week_num == 4:
             content = self.sap.oversea_exhibition(bp)
