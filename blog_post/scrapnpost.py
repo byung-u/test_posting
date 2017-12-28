@@ -13,6 +13,37 @@ class ScrapAndPost:
     def __init__(self):
         pass
 
+    def koreagov_news(self, bp):
+        base_url1 = 'http://www.korea.kr/policy/mainView.do?'
+        base_url2 = 'http://www.korea.kr/policy/policyPhotoView.do?'
+        result = '<font color="blue">[한국 정책 뉴스]</font><br>'
+        for i in range(1, 5):  # maybe 1~3 pages per a day
+            url = 'http://www.korea.kr/policy/mainList.do?pageIndex=%d&srchRepCodeType=&repCodeType=&repCode=&startDate=%4d-%02d-%02d&endDate=%4d-%02d-%02d&srchWord=#goView' % (
+                  i,
+                  bp.now.year, bp.now.month, bp.now.day,
+                  bp.now.year, bp.now.month, bp.now.day)
+            r = bp.request_and_get(url, '정책뉴스')
+            if r is None:
+                continue
+            soup = BeautifulSoup(r.text, 'html.parser')
+            for thumb in soup.find_all(bp.match_soup_class(['thumb'])):
+                try:
+                    conn_url = thumb.a['onclick'].split("'")[1]
+                except TypeError:
+                    continue
+                except KeyError:
+                    continue
+
+                if conn_url.startswith('newsId='):
+                    href = '%s%s' % (base_url1, conn_url)
+                else:
+                    href = '%s%s' % (base_url2, conn_url)
+
+                img = thumb.find('img')
+                title = bp.check_valid_string(img['alt'])
+                result = '%s<br><a href="%s" target="_blank">- %s</a>' % (result, href, title)
+        return result
+
     def realestate_daum(self, bp):
         r = bp.request_and_get('http://realestate.daum.net/news', 'daum부동산')
         if r is None:
@@ -735,6 +766,10 @@ class ScrapAndPost:
         title = '[%s] 경제 금융 뉴스 헤드라인 모음(연합인포맥스, 조선일보, 중앙일보)' % bp.today
         content = self.financial_news(bp)
         bp.tistory_post('scrapnpost', title, content, '765357')
+
+        title = '[%s] 정책뉴스' % bp.today
+        content = self.koreagov_news(bp)
+        bp.tistory_post('scrapnpost', title, content, '766948')  # korea department
 
     def weekend(self, bp):
         title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
