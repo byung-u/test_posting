@@ -225,28 +225,29 @@ class ScrapAndPost:
             result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, alist.a['href'], title)
         return result
 
-    def get_reddit(self, bp, category='it'):
+    def get_reddit(self, bp, category='til'):
         result = ''
         reddit = praw.Reddit(client_id=bp.reddit_cid,
                              client_secret=bp.reddit_csec, password=bp.reddit_pw,
                              user_agent='USERAGENT', username=bp.reddit_id)
 
-        if category == 'it':
+        if category == 'til':
             # for submission in reddit.subreddit('redditdev+learnpython').top('all'):
-            for idx, sub in enumerate(reddit.subreddit('python+programming').hot(limit=30)):
+            for idx, sub in enumerate(reddit.subreddit('todayilearned').hot(limit=30)):
                 temp = '<a href="%s" target="_blank">[%d] %s (⬆ %s)</a><br><pre>%s</pre><br>' % (sub.url, idx + 1, sub.title, sub.score, bp.translate_text(sub.title))
                 result = '%s<br>%s' % (result, temp)
-                if idx % 20 == 0:
-                    result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
-            content = '<font color="red">[레딧(Reddit) Python & Programming]</font>%s<br>' % result
+            content = '<font color="red">[레딧(Reddit) 오늘 배운거]</font>%s<br>' % result
+        elif category == 'programming':
+            for idx, sub in enumerate(reddit.subreddit('programming').hot(limit=30)):
+                temp = '<a href="%s" target="_blank">[%d] %s (⬆ %s)</a><br><pre>%s</pre><br>' % (sub.url, idx + 1, sub.title, sub.score, bp.translate_text(sub.title))
+                result = '%s<br>%s' % (result, temp)
+            content = '<font color="red">[레딧(Reddit) Programming]</font>%s<br>' % result
 
-        elif category == 'korea':
-            for idx, sub in enumerate(reddit.subreddit('korea').hot(limit=60)):
+        elif category == 'worldnews':
+            for idx, sub in enumerate(reddit.subreddit('worldnews').hot(limit=30)):
                 temp = '<a href="%s" target="_blank">[%d] %s (⬆ %s)</a><br><pre>%s</pre><br>' % (sub.url, idx + 1, sub.title, sub.score, bp.translate_text(sub.title))
                 result = '%s<br>%s' % (result, temp)
-                if idx % 20 == 0:
-                    result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
-            content = '<font color="red">[레딧(Reddit) Korea]</font>%s<br>' % result
+            content = '<font color="red">[레딧(Reddit) 세계뉴스]</font>%s<br>' % result
 
         return content
 
@@ -282,7 +283,7 @@ class ScrapAndPost:
 
         result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
 
-        content = self.realestate_donga(bp)  # 동아일보
+        content = self.donga_news(bp, 'http://news.donga.com/List/Economy/RE', '부동산')  # 동아일보
         result = '%s<br><br><br>%s' % (result, content)
         content = self.realestate_mbn(bp)  # 매일경제
         result = '%s<br><br><br>%s' % (result, content)
@@ -295,6 +296,8 @@ class ScrapAndPost:
     def financial_news(self, bp):
         result = ''
 
+        content = self.donga_news(bp, 'http://news.donga.com/Economy', '경제')  # 동아일보
+        result = '%s<br><br><br>%s' % (result, content)
         content = self.financial_einfomax(bp)
         result = '%s<br><br><br>%s' % (result, content)
         content = self.financial_chosun(bp)
@@ -557,12 +560,12 @@ class ScrapAndPost:
             result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
         return result
 
-    def opinion_donga(self, bp):
-        r = bp.request_and_get('http://news.donga.com/Column/', '동아일보Opinion')
+    def donga_news(self, bp, url, category):
+        r = bp.request_and_get('http://news.donga.com/Column/', '동아일보')
         if r is None:
             return
 
-        result = '<font color="blue">[동아일보 사설, 칼럼]</font>'
+        result = '<font color="blue">[동아일보 %s]</font>' % category
         soup = BeautifulSoup(r.text, 'html.parser')
         for alist in soup.find_all(bp.match_soup_class(['articleList'])):
             tit = alist.find('span', attrs={'class': 'tit'})
@@ -730,7 +733,7 @@ class ScrapAndPost:
         result = '%s<br><br><br>%s' % (result, content)
         content = self.opinion_kookmin(bp)  # 국민일보
         result = '%s<br><br><br>%s' % (result, content)
-        content = self.opinion_donga(bp)  # 동아일보
+        content = self.donga_news(bp, 'http://news.donga.com/Column/', '사설, 칼럼')  # 동아일보
         result = '%s<br><br><br>%s' % (result, content)
         content = self.opinion_mbn(bp)  # 매일경제
         result = '%s<br><br><br>%s' % (result, content)
@@ -771,13 +774,17 @@ class ScrapAndPost:
         content = self.koreagov_news(bp)
         bp.tistory_post('scrapnpost', title, content, '766948')  # korea department
 
+        title = '[%s] Reddit에 공유된 오늘 내가 배운것(Today I Learned)' % bp.today
+        content = self.get_reddit(bp, 'til')
+        bp.tistory_post('scrapnpost', title, content, '765395')
+
     def weekend(self, bp):
-        title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
-        content = self.get_reddit(bp, 'korea')
+        title = '[%s] Reddit의 세계뉴스' % bp.today
+        content = self.get_reddit(bp, 'worldnews')
         bp.tistory_post('scrapnpost', title, content, '765357')
 
-        title = '[%s] Reddit (Programming & Python)' % bp.today
-        content = self.get_reddit(bp)
+        title = '[%s] Reddit의 Programming 관련 소식' % bp.today
+        content = self.get_reddit(bp, 'programming')
         bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
 
         title = '[%s] Hacker News (Ranking 1~30)' % bp.today
@@ -789,15 +796,15 @@ class ScrapAndPost:
             self.weekday(bp)
 
         if bp.week_num == 0:
-            title = '[%s] Reddit에 올라온 한국 관련 소식' % bp.today
-            content = self.get_reddit(bp, 'korea')
+            title = '[%s] Reddit의 세계뉴스' % bp.today
+            content = self.get_reddit(bp, 'worldnews')
             bp.tistory_post('scrapnpost', title, content, '765357')
-            content = self.oversea_exhibition(bp)
             title = '[%s] 해외 전시 정보' % bp.today
+            content = self.oversea_exhibition(bp)
             bp.tistory_post('scrapnpost', title, content, '765395')
         elif bp.week_num == 1:
-            title = '[%s] Reddit (Programming & Python)' % bp.today
-            content = self.get_reddit(bp)
+            title = '[%s] Reddit의 Programming 관련 소식' % bp.today
+            content = self.get_reddit(bp, 'programming')
             bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
         elif bp.week_num == 2:
             title = '[%s] Hacker News (Ranking 1~30)' % bp.today
