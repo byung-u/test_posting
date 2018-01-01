@@ -274,7 +274,7 @@ class NaverPost:
         content = self.sap.koreagov_news(bp)
         bp.naver_post(title, content)
 
-        title = '[%s] Reddit에 공유된 오늘 내가 배운것(Today I Learned)' % bp.today
+        title = '[%s] Reddit에 공유된 오늘 본인들이 배운것(Today I Learned)' % bp.today
         content = self.sap.get_reddit(bp, 'til')
         bp.naver_post(title, content)
 
@@ -307,7 +307,7 @@ class NaverPost:
             bp.naver_post(title, content, '8')
 
         elif bp.week_num == 4:
-            content = self.sap.oversea_exhibition(bp)
             title = '[%s] 해외 전시 정보' % bp.today
+            content = self.sap.oversea_exhibition(bp)
             bp.naver_post(title, content, '8')
         return
