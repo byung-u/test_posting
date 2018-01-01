@@ -307,10 +307,14 @@ class ScrapAndPost:
 
         return result
 
-    def get_exhibit_image(self, href):
+    def get_exhibit_image(self, bp, href):
         try:
             page = urllib.request.urlopen(href)
         except UnicodeEncodeError:
+            bp.logger.error('[get_exhibit_image] UnicodeEncodeError %s', href)
+            return None
+        except urllib.error.URLError:
+            bp.logger.error('[get_exhibit_image] URLError %s', href)
             return None
         base_url = href.split('/')
         base_url = '%s//%s' % (base_url[0], base_url[2])
@@ -338,7 +342,7 @@ class ScrapAndPost:
         try:
             res = urllib.request.urlopen(req)
         except UnicodeEncodeError:
-            self.logger.error('[overseasExhibition] UnicodeEncodeError')
+            bp.logger.error('[overseasExhibition] UnicodeEncodeError')
             return
 
         result = ''
@@ -350,7 +354,7 @@ class ScrapAndPost:
             if not href.startswith('http://'):
                 href = 'http://%s' % href
 
-            img_link = self.get_exhibit_image(href)
+            img_link = self.get_exhibit_image(bp, href)
             if img_link is None:
                 img_link = '#'
 
@@ -774,7 +778,7 @@ class ScrapAndPost:
         content = self.koreagov_news(bp)
         bp.tistory_post('scrapnpost', title, content, '766948')  # korea department
 
-        title = '[%s] Reddit에 공유된 오늘 내가 배운것(Today I Learned)' % bp.today
+        title = '[%s] Reddit에 공유된 오늘 본인들이 배운것(Today I Learned)' % bp.today
         content = self.get_reddit(bp, 'til')
         bp.tistory_post('scrapnpost', title, content, '765395')
 
