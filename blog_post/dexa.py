@@ -90,7 +90,10 @@ class DailyLifeAndPost:
                 for i2, tr in enumerate(article.find_all('tr')):
                     if i2 == 0:  # category
                         continue
-                    onclick = tr.find('input', {'name': 'chk'}).get('onclick')
+                    try:
+                        onclick = tr.find('input', {'name': 'chk'}).get('onclick')
+                    except AttributeError:
+                        continue
                     on_split = onclick.split("'")
                     href = 'https://culture.lotteshopping.com/CLSS_view.do?taskID=L&pageNo=1&vpStrCd=%s&vpKisuNo=%s&vpClassCd=%s' % (on_split[1], on_split[3], on_split[5])
 
