@@ -303,7 +303,7 @@ class NaverPost:
             bp.naver_post(title, content)
 
             title = '[%s] 코엑스, 예술의 전당(공연, 전시)' % bp.today
-            content = self.domestic_exhibition(bp)
+            content = self.sap.domestic_exhibition(bp)
             bp.naver_post(title, content, '8')
 
         elif bp.week_num == 4:
