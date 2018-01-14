@@ -14,6 +14,7 @@ class ScrapAndPost:
         pass
 
     def koreagov_news(self, bp):
+        news_cnt = 0
         base_url1 = 'http://www.korea.kr/policy/mainView.do?'
         base_url2 = 'http://www.korea.kr/policy/policyPhotoView.do?'
         result = '<font color="blue">[한국 정책 뉴스]</font><br>'
@@ -42,6 +43,9 @@ class ScrapAndPost:
                 img = thumb.find('img')
                 title = bp.check_valid_string(img['alt'])
                 result = '%s<br><a href="%s" target="_blank">- %s</a>' % (result, href, title)
+                news_cnt += 1
+        if news_cnt == 0:
+            return None
         return result
 
     def realestate_daum(self, bp):
@@ -57,7 +61,8 @@ class ScrapAndPost:
             except TypeError:
                 continue
             title = bp.check_valid_string(f.text)
-            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
+            summary = bp.get_news_summary(href)
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
         return result
 
     def realestate_mbn(self, bp):
@@ -70,7 +75,7 @@ class ScrapAndPost:
         for f in soup.find_all(bp.match_soup_class(['art_list'])):
             href = f.a['href']
             title = bp.check_valid_string(f.a['title'])
-            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>' % (result, href, title)
         return result
 
     def realestate_hankyung(self, bp):
@@ -86,7 +91,8 @@ class ScrapAndPost:
                 continue
             href = s['href']
             title = bp.check_valid_string(s.text)
-            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
+            summary = bp.get_news_summary(href)
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
         return result
 
     def realestate_naver(self, bp):
@@ -101,7 +107,8 @@ class ScrapAndPost:
         for s in sessions:
             href = '%s%s' % (base_url, s['href'])
             title = bp.check_valid_string(s.text)
-            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
+            summary = bp.get_news_summary(href)
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
 
         sessions = soup.select('div > ul > li > dl > dt > a')
         for s in sessions:
@@ -109,7 +116,8 @@ class ScrapAndPost:
                 continue
             href = '%s%s' % (base_url, s['href'])
             title = bp.check_valid_string(s.text)
-            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
+            summary = bp.get_news_summary(href)
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
         return result
 
     def financial_einfomax(self, bp):
@@ -179,7 +187,8 @@ class ScrapAndPost:
             href = '%s%s' % (base_url, article.a['href'])
             article = article.text.strip().split('\n')
             title = bp.check_valid_string(article[0])
-            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
+            summary = bp.get_news_summary(href)
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
         return result
 
     def realestate_nocut(self, bp):
@@ -194,7 +203,8 @@ class ScrapAndPost:
         for dt in news.find_all('dt'):
             href = '%s%s' % (base_url, dt.a['href'])
             title = bp.check_valid_string(dt.text)
-            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
+            summary = bp.get_news_summary(href)
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
         return result
 
     def realestate_nate(self, bp):
@@ -209,20 +219,8 @@ class ScrapAndPost:
             span = news.find('span', attrs={'class': 'tb'})
             tit = span.find('strong', attrs={'class': 'tit'})
             title = bp.check_valid_string(tit.text)
-            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, news.a['href'], title)
-        return result
-
-    def realestate_donga(self, bp):
-        r = bp.request_and_get('http://news.donga.com/List/Economy/RE', '동아일보부동산')
-        if r is None:
-            return
-
-        result = '<font color="blue">[동아일보 부동산 뉴스]</font><br>'
-        soup = BeautifulSoup(r.text, 'html.parser')
-        for alist in soup.find_all(bp.match_soup_class(['articleList'])):
-            tit = alist.find('span', attrs={'class': 'tit'})
-            title = bp.check_valid_string(tit.text)
-            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, alist.a['href'], title)
+            summary = bp.get_news_summary(news.a['href'])
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, news.a['href'], title, summary)
         return result
 
     def get_reddit(self, bp, category='til'):
@@ -270,33 +268,48 @@ class ScrapAndPost:
         return content
 
     def realestate_news(self, bp):
-        result = '<h3>뉴스 언론사 목록</h3><br><strong> 노컷뉴스, Naver, Nate, Daum, 동아일보, 매일경제, 한겨례, 한국경제</strong><br><br>'
+        result = '언론사 목록<br><strong> 경향신문, 국민일보, 노컷뉴스, 동아일보, 매일경제, 문화일보, 세계신문, 중앙일보, 조선일보, 한겨례, 한국경제, 한국일보</strong><br>포털<br>Naver, Nate, Daum<br><br>'
 
+        content = self.realestate_gyunghyang(bp)  # 경향신문
+        result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_kookmin(bp)  # 국민일보
+        result = '%s<br><br><br>%s' % (result, content)
         content = self.realestate_nocut(bp)  # 노컷뉴스
         result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_donga(bp)  # 동아일보
+        result = '%s<br><br><br>%s' % (result, content)
+        result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
+
+        content = self.realestate_mbn(bp)  # 매일경제
+        result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_moonhwa(bp)  # 문화일보
+        result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_segye(bp)  # 세계신문
+        result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_joins(bp)  # 중앙일보
+        result = '%s<br><br><br>%s' % (result, content)
+        result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
+
+        content = self.realestate_chosun(bp)  # 조선일보
+        result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_hani(bp)  # 한겨례
+        result = '%s<br><br><br>%s' % (result, content)
+        content = self.realestate_hankyung(bp)  # 한국경제
+        result = '%s<br><br><br>%s' % (result, content)
+        result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
+
         content = self.realestate_naver(bp)  # Naver
         result = '%s<br><br><br>%s' % (result, content)
         content = self.realestate_nate(bp)  # Nate
         result = '%s<br><br><br>%s' % (result, content)
         content = self.realestate_daum(bp)  # Daum
         result = '%s<br><br><br>%s' % (result, content)
-
-        result = '%s<br><br>%s<br><br>' % (result, ADSENSE_MIDDLE)  # add advertise
-
-        content = self.donga_news(bp, 'http://news.donga.com/List/Economy/RE', '부동산')  # 동아일보
-        result = '%s<br><br><br>%s' % (result, content)
-        content = self.realestate_mbn(bp)  # 매일경제
-        result = '%s<br><br><br>%s' % (result, content)
-        content = self.realestate_hani(bp)  # 한겨례
-        result = '%s<br><br><br>%s' % (result, content)
-        content = self.realestate_hankyung(bp)  # 한국경제
-        result = '%s<br><br><br>%s' % (result, content)
         return result
 
     def financial_news(self, bp):
         result = ''
 
-        content = self.donga_news(bp, 'http://news.donga.com/Economy', '경제')  # 동아일보
+        content = self.financial_donga(bp, '경제')  # 동아일보
         result = '%s<br><br><br>%s' % (result, content)
         content = self.financial_einfomax(bp)
         result = '%s<br><br><br>%s' % (result, content)
@@ -564,8 +577,21 @@ class ScrapAndPost:
             result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
         return result
 
-    def donga_news(self, bp, url, category):
+    def opinion_donga(self, bp, url, category):
         r = bp.request_and_get('http://news.donga.com/Column/', '동아일보')
+        if r is None:
+            return
+
+        result = '<font color="blue">[동아일보 %s]</font>' % category
+        soup = BeautifulSoup(r.text, 'html.parser')
+        for alist in soup.find_all(bp.match_soup_class(['articleList'])):
+            tit = alist.find('span', attrs={'class': 'tit'})
+            title = bp.check_valid_string(tit.text)
+            result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, alist.a['href'], title)
+        return result
+
+    def financial_donga(self, bp, category):
+        r = bp.request_and_get('http://news.donga.com/Economy', '경제')  # 동아일보
         if r is None:
             return
 
@@ -663,6 +689,129 @@ class ScrapAndPost:
                 result = '%s<br><a href="%s" target="_blank">%s</a>' % (result, href, title)
         return result
 
+    def realestate_gyunghyang(self, bp):
+        r = bp.request_and_get('http://biz.khan.co.kr/khan_art_list.html?category=realty', '경향신문Realestate')
+        if r is None:
+            return
+
+        result = '<font color="blue">[경향신문 부동산]</font>'
+        soup = BeautifulSoup(r.content.decode('euc-kr', 'replace'), 'html.parser')
+        for news_list in soup.find_all(bp.match_soup_class(['news_list'])):
+            for li in news_list.find_all('li'):
+                try:
+                    title = bp.check_valid_string(li.img['alt'])
+                    summary = bp.get_news_summary(li.a['href'])
+                    result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, li.a['href'], title, summary)
+                except TypeError:
+                    title = li.a.text
+                    summary = bp.get_news_summary(li.a['href'])
+                    result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, li.a['href'], title, summary)
+        return result
+
+    def realestate_kookmin(self, bp):
+        url = 'http://news.kmib.co.kr/article/list.asp?sid1=eco'
+        r = bp.request_and_get(url, '국민일보R')
+        if r is None:
+            return
+
+        base_url = 'http://news.kmib.co.kr/article'
+        result = '<font color="blue">[국민일보 부동산]</font>'
+        soup = BeautifulSoup(r.content.decode('euc-kr', 'replace'), 'html.parser')
+        for nws_list in soup.find_all(bp.match_soup_class(['nws_list'])):
+            for dl in nws_list.find_all('dl'):
+                if dl.text == '등록된 기사가 없습니다.':
+                    result = '%s<br>현재 %s<br>' % (result, dl.text)
+                    return result
+                dt = dl.find('dt')
+                href = '%s/%s' % (base_url, dt.a['href'])
+                title = bp.check_valid_string(dt.a.text)
+                if title.find('아파트') != -1 or title.find('부동산') != -1:
+                    summary = bp.get_news_summary(href)
+                    result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
+        return result
+
+    def realestate_donga(self, bp):
+        r = bp.request_and_get('http://news.donga.com/List/Economy/RE', '동아일보부동산')
+        if r is None:
+            return
+
+        result = '<font color="blue">[동아일보 부동산 뉴스]</font><br>'
+        soup = BeautifulSoup(r.text, 'html.parser')
+        for alist in soup.find_all(bp.match_soup_class(['articleList'])):
+            tit = alist.find('span', attrs={'class': 'tit'})
+            title = bp.check_valid_string(tit.text)
+            summary = bp.get_news_summary(alist.a['href'])
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, alist.a['href'], title, summary)
+        return result
+
+    def realestate_moonhwa(self, bp):
+        r = bp.request_and_get('http://www.munhwa.com/news/section_list.html?sec=economy&class=5', '문화일보R')
+        if r is None:
+            return
+
+        result = '<font color="blue">[문화일보 부동산]</font>'
+        soup = BeautifulSoup(r.content.decode('euc-kr', 'replace'), 'html.parser')
+        for d14b_333 in soup.find_all(bp.match_soup_class(['d14b_333'])):
+            title = bp.check_valid_string(d14b_333.text)
+            summary = bp.get_news_summary(d14b_333['href'])
+            result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, d14b_333['href'], title, summary)
+        return result
+
+    def realestate_segye(self, bp):
+        r = bp.request_and_get('http://www.segye.com/newsList/0101030700000', '세계일보R')
+        if r is None:
+            return
+
+        result = '<font color="blue">[세계일보 부동산]</font>'
+        base_url = 'http://www.segye.com'
+        soup = BeautifulSoup(r.content.decode('utf-8', 'replace'), 'html.parser')
+        for r_txt in soup.find_all(bp.match_soup_class(['r_txt'])):
+            for dt in r_txt.find_all('dt'):
+                href = '%s%s' % (base_url, dt.a['href'])
+                title = dt.text
+                summary = bp.get_news_summary(href)
+                result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
+        return result
+
+    def realestate_joins(self, bp):
+        r = bp.request_and_get('http://realestate.joins.com/?cloc=joongang|section|subsection', '중앙일보부동산')
+        if r is None:
+            return
+
+        base_url = 'http://news.joins.com'
+        result = '<font color="blue">[중앙일보 부동산]</font><br>'
+        soup = BeautifulSoup(r.content.decode('utf-8', 'replace'), 'html.parser')
+        for f in soup.find_all(bp.match_soup_class(['bd'])):
+            for li in f.find_all('li'):
+                try:
+                    title = li.a['title']
+                except KeyError:
+                    title = bp.check_valid_string(' '.join(li.text.strip().split()[1:-2]))
+                try:
+                    href = '%s%s' % (base_url, li.a['href'])
+                except TypeError:
+                    continue
+                summary = bp.get_news_summary(href)
+                result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
+        return result
+
+    def realestate_chosun(self, bp):
+        r = bp.request_and_get('http://biz.chosun.com/svc/list_in/list.html?catid=4&gnb_global', '조선일보R')
+        if r is None:
+            return
+
+        result = '<font color="blue">[조선일보 부동산]</font>'
+        base_url = 'http://biz.chosun.com'
+        soup = BeautifulSoup(r.content.decode('utf-8', 'replace'), 'html.parser')
+        for f in soup.find_all(bp.match_soup_class(['list_vt'])):
+            for li in f.find_all('li'):
+                dt = li.find('dt')
+                href = '%s%s' % (base_url, li.a['href'])
+                title = bp.check_valid_string(dt.a.text)
+                summary = bp.get_news_summary(href)
+                result = '%s<br><a href="%s" target="_blank"><font color="red">%s</font></a><br>%s<br>' % (result, href, title, summary)
+        return result
+
     def opinion_gyunghyang(self, bp):
         r = bp.request_and_get('http://news.khan.co.kr/kh_news/khan_art_list.html?code=990000', '경향신문Opinion')
         if r is None:
@@ -737,7 +886,7 @@ class ScrapAndPost:
         result = '%s<br><br><br>%s' % (result, content)
         content = self.opinion_kookmin(bp)  # 국민일보
         result = '%s<br><br><br>%s' % (result, content)
-        content = self.donga_news(bp, 'http://news.donga.com/Column/', '사설, 칼럼')  # 동아일보
+        content = self.opinion_donga(bp, 'http://news.donga.com/Column/', '사설, 칼럼')  # 동아일보
         result = '%s<br><br><br>%s' % (result, content)
         content = self.opinion_mbn(bp)  # 매일경제
         result = '%s<br><br><br>%s' % (result, content)
@@ -766,7 +915,7 @@ class ScrapAndPost:
         content = self.opinion_news(bp)
         bp.tistory_post('scrapnpost', title, content, '767067')  # 사설, 칼럼
 
-        title = '[%s] 부동산 뉴스 헤드라인 모음(노컷뉴스, Naver, Nate, Daum, 동아일보, 매일경제, 한겨례, 한국경제)' % bp.today
+        title = '[%s] 국내 주요언론사 부동산 뉴스 헤드라인(ㄱ, ㄴ순)' % bp.today
         content = self.realestate_news(bp)
         bp.tistory_post('scrapnpost', title, content, '765348')
 
@@ -776,7 +925,10 @@ class ScrapAndPost:
 
         title = '[%s] 정책뉴스' % bp.today
         content = self.koreagov_news(bp)
-        bp.tistory_post('scrapnpost', title, content, '766948')  # korea department
+        if content is None:
+            print('News not found (한국정책뉴스)')
+        else:
+            bp.tistory_post('scrapnpost', title, content, '766948')  # korea department
 
         title = '[%s] Reddit에 공유된 오늘 본인들이 배운것(Today I Learned)' % bp.today
         content = self.get_reddit(bp, 'til')
@@ -796,6 +948,12 @@ class ScrapAndPost:
         bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
 
     def scrapnpost(self, bp):
+        # TEST
+        content = self.realestate_news(bp)
+        print('aaaaaaaa')
+        print(content)
+        return
+
         if bp.week_num < 5:
             self.weekday(bp)
 

@@ -3,6 +3,7 @@
 import cgitb
 import json
 import logging
+import newspaper
 import os
 import re
 import urllib.request
@@ -10,6 +11,7 @@ import urllib.request
 from datetime import datetime, timedelta
 from googletrans import Translator
 from goose3 import Goose
+from newspaper import Article
 from random import choice
 from requests import get, codes
 from selenium import webdriver
@@ -43,14 +45,14 @@ class BlogPost:
         self.tistory_pw = os.environ.get('TISTORY_PAW')
         self.tistory_cid = os.environ.get('TISTORY_CLIENT_ID')
         self.tistory_redirect = os.environ.get('TISTORY_REDIRECT')
-        self.tistory_token = self.get_tistory_token()
+        # self.tistory_token = self.get_tistory_token()
 
         self.naver_cid = os.environ.get('NAVER_BLOG_CLIENT_ID')
         self.naver_csec = os.environ.get('NAVER_BLOG_CLIENT_SECRET')
         self.naver_id = os.environ.get('NAVER_ID')
         self.naver_pw = os.environ.get('NAVER_PAW')
         self.naver_redirect = os.environ.get('NAVER_BLOG_REDIRECT')
-        self.naver_token = self.get_naver_token()
+        # self.naver_token = self.get_naver_token()
 
         self.korea_data_key = os.environ.get('DATA_APT_API_KEY')
         self.finlife_key = os.environ.get('FINLIFE_KEY')
@@ -91,6 +93,16 @@ class BlogPost:
         except:
             self.logger.error('[%s] connect fail', name)
             return None
+
+    def get_news_summary(self, url):
+        article = Article(url)
+        article.download()
+        try:
+            article.parse()
+        except newspaper.article.ArticleException:
+            return ' '
+        article.nlp()
+        return article.summary
 
     def check_valid_string(self, text):
         text = text.strip()
@@ -262,6 +274,10 @@ class BlogPost:
 
 
 def do_run(bp):
+    sap = ScrapAndPost()
+    sap.scrapnpost(bp)
+    return
+
     sap = ScrapAndPost()
     sap.scrapnpost(bp)
     sleep(5)  # 5 sec
