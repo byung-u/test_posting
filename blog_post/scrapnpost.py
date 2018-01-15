@@ -948,12 +948,6 @@ class ScrapAndPost:
         bp.tistory_post('scrapnpost', title, content, '765668')  # IT news
 
     def scrapnpost(self, bp):
-        # TEST
-        content = self.realestate_news(bp)
-        print('aaaaaaaa')
-        print(content)
-        return
-
         if bp.week_num < 5:
             self.weekday(bp)
 
