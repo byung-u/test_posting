@@ -35,6 +35,7 @@ class BlogPost:
         self.now = datetime.now()
         self.now_m1 = datetime.now() - timedelta(days=1)  # now - 1 is yesterday
         self.today = '%4d%02d%02d' % (self.now.year, self.now.month, self.now.day)
+        self.str_today = '%4d/%s/%02d' % (self.now.year, self.now.strftime("%b").lower(), self.now.day)
         self.yesterday = '%4d%02d%02d' % (self.now_m1.year, self.now_m1.month, self.now_m1.day)
         self.str_yesterday = '%4d/%s/%02d' % (self.now_m1.year, self.now_m1.strftime("%b").lower(), self.now_m1.day)
         self.yesterday_only_day = '%02d' % (self.now_m1.day)
@@ -102,7 +103,7 @@ class BlogPost:
         except newspaper.article.ArticleException:
             return ' '
         article.nlp()
-        return article.summary
+        return article.summary, article.title
 
     def check_valid_string(self, text):
         text = text.strip()
