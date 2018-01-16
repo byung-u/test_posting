@@ -52,34 +52,25 @@ class TranslationAndPost:
         return result
 
     def the_guardian(self, bp):
-        r = bp.request_and_get('https://www.theguardian.com/business/economics', '가디언기사')
+        result = '[%s] The Guardian 오피니언 요약<br><br>' % bp.today
+        r = bp.request_and_get('https://www.theguardian.com/uk/commentisfree', '가디언기사')
         if r is None:
             return
         soup = BeautifulSoup(r.text, 'html.parser')
         sessions = soup.select('div > div > div > ul > li > ul > li > div > div > a')
         for s in sessions:
             href = s['href']
-            if href.find(bp.str_yesterday) == -1:
+            if href.find(bp.str_yesterday) == -1 and href.find(bp.str_today) == -1:
                 continue
-            result = []
-            title = s.text
+
+            summary, title = bp.get_news_summary(href)
+
             ko_title = bp.translate_text(title)
-            a_r = bp.request_and_get(href, '가디언기사')
-            if a_r is None:
-                continue
-            a_soup = BeautifulSoup(a_r.text, 'html.parser')
-            for ca in a_soup.find_all(bp.match_soup_class(['content__article-body'])):
-                temp_text = ca.text
-                break
-            temp = temp_text.split('\n')
-            article = [t for t in temp if len(t) > 150]
-            result = bp.translate_text_list(article, 'en', 'ko')
+            ko_summary = bp.translate_text(summary)
+            temp = '<a href="%s" target="_blank"><font color="blue">%s</font></a><br>%s<br><a href="%s" target="_blank"><font color="red">🔗 전체내용 Link</font></a><br><div style="border:1px solid grey"><br>%s<br><br>"%s"</div><br><br>' % (href, title, summary, href, ko_title, ko_summary)
+            result = '%s<br>%s' % (result, temp)
+        return result
 
-            content = '<a href="%s" target="_blank"><font color="red">🔗 원본 Link(%s)</font></a><br><br><br>%s<br>' % (href, href, result)
-
-            post_title = '[%s] %s(%s)' % (bp.today, ko_title, title)
-            bp.tistory_post('trab', post_title, content, '766230')
-            return  # XXX: only 1 article posting
 
     def nikkei_japan(self, bp):
         url = 'https://www.nikkei.com/access/'
@@ -222,5 +213,6 @@ class TranslationAndPost:
         elif bp.week_num == 3:
             self.wired_popular(bp)  # twice a week
         elif bp.week_num == 4:
-            self.the_guardian(bp)
-
+            title = '[%s] The Guardian 뉴스 요약 및 키워드' % bp.today
+            content = self.the_guardian(bp)
+            bp.tistory_post('trab', title, content, '766230')
