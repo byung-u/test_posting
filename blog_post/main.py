@@ -189,7 +189,12 @@ class BlogPost:
         header = "Bearer " + self.naver_token  # Bearer 다음에 공백 추가
         url = "https://openapi.naver.com/blog/writePost.json"
         title = urllib.parse.quote(title)
-        contents = urllib.parse.quote(content)
+        try:
+            contents = urllib.parse.quote(content)
+        except TypeError:
+            self.logger.error('urllib.parse.quote failed')
+            return
+
         data = "title=" + title + "&contents=" + contents + '&categoryNo=' + category
         request = urllib.request.Request(url, data=data.encode("utf-8"))
         request.add_header("Authorization", header)
